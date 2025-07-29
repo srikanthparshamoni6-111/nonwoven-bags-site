@@ -185,7 +185,7 @@ To improve SEO further:
 ## 📞 Support
 
 For questions about this website:
-- **Sales & Marketing**: Srikanth (8790285519)
+- **Sales & Marketing**: Srikanth (6302067390)
 - **Operations**: Kavya (9381430317)
 - **General**: Jamuna & Narsimlu (9000115605)
 
