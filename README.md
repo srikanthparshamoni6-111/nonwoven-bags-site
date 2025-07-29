@@ -73,6 +73,11 @@ Edit the contact details in `index.html`:
 <p><i class="fas fa-phone"></i> 9000115605</p>
 ```
 
+<a href="https://wa.me/916302067390?text=Hi%20I%20want%20to%20place%20an%20order%20for%20non-woven%20bags" target="_blank">
+  <img src="https://img.icons8.com/color/48/000000/whatsapp.png" alt="WhatsApp" style="vertical-align:middle;" />
+  Chat with us on WhatsApp
+</a>
+
 ### Adding Your Logo
 Replace the text logo with an image:
 ```html
