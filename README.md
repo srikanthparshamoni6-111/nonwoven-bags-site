@@ -11,11 +11,12 @@ A modern, professional website for Srivenkateshwara NON Woven Bags manufacturing
 - Professional color scheme with green accents representing eco-friendliness
 
 ### ✅ Complete Business Sections
-- **Hero Section**: Eye-catching introduction with key statistics
-- **About Us**: Company story, mission, and key features
+- **Hero Section**: Auto-sliding carousel with real non-woven bag images
+- **About Us**: Company story, mission, and key features with real manufacturing images
 - **Products**: Comprehensive product catalog with 6 main categories
+- **Order Now**: Complete order form with email and WhatsApp integration
 - **Services**: Additional services offered by the company
-- **Contact**: Multiple contact methods with team information
+- **Contact**: Multiple contact methods with updated team information
 
 ### ✅ Interactive Features
 - Mobile-responsive navigation with hamburger menu
@@ -31,11 +32,36 @@ A modern, professional website for Srivenkateshwara NON Woven Bags manufacturing
 
 ### ✅ Contact Integration
 - **Proprietors**: Jamuna & Narsimlu (9000115605)
-- **Sales & Marketing**: Srikanth (8790285519)
+- **Sales & Marketing**: Srikanth & Shiva sai (6302067390)
 - **Operations**: Kavya (9381430317)
 - WhatsApp links for each department
 - Email contact form
 - Location: Kottur Shadnagar
+
+## 🆕 **Latest Updates & Fixes**
+
+### ✅ **Recently Fixed Issues**
+1. **Auto-Sliding Hero Images**: Real non-woven bag images that change every 4 seconds
+2. **Working Email System**: Orders automatically sent to `srivenkateshwaranonwovenbags6@gmail.com`
+3. **WhatsApp Integration**: Instant order notifications via WhatsApp to `6302067390`
+4. **Real Product Images**: Replaced all placeholder images with actual bag photos
+5. **Modern Carousel**: Interactive image slider with manual controls
+6. **Updated Contact Info**: Srikanth & Shiva sai - 6302067390 (Sales)
+
+### 🌟 **New Features Added**
+- **Automatic Image Carousel**: 5 different non-woven bag images
+- **Manual Slide Control**: Click dots to manually change images
+- **Enhanced Order Form**: Professional order processing with validation
+- **Instant Notifications**: Both email and WhatsApp alerts
+- **Real-time Processing**: Orders processed immediately upon submission
+
+### 📧 **Order Management Process**
+When someone places an order:
+1. **Customer fills order form** → 
+2. **Email automatically sent** to `srivenkateshwaranonwovenbags6@gmail.com` → 
+3. **WhatsApp message sent** to `6302067390` → 
+4. **You receive instant notifications** on both platforms → 
+5. **You respond within 2 hours** with a professional quote
 
 ## 🚀 Getting Started
 
@@ -72,11 +98,6 @@ Edit the contact details in `index.html`:
 <!-- Search for phone numbers and update as needed -->
 <p><i class="fas fa-phone"></i> 9000115605</p>
 ```
-
-<a href="https://wa.me/916302067390?text=Hi%20I%20want%20to%20place%20an%20order%20for%20non-woven%20bags" target="_blank">
-  <img src="https://img.icons8.com/color/48/000000/whatsapp.png" alt="WhatsApp" style="vertical-align:middle;" />
-  Chat with us on WhatsApp
-</a>
 
 ### Adding Your Logo
 Replace the text logo with an image:
@@ -190,7 +211,7 @@ To improve SEO further:
 ## 📞 Support
 
 For questions about this website:
-- **Sales & Marketing**: Srikanth (6302067390)
+- **Sales & Marketing**: Srikanth & Shiva sai (6302067390)
 - **Operations**: Kavya (9381430317)
 - **General**: Jamuna & Narsimlu (9000115605)
 
