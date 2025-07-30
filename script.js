@@ -972,6 +972,7 @@ class ChatbotAssistant {
         this.currentStep = 'initial';
         this.userData = {};
         this.conversationFlow = {};
+        this.isProcessing = false; // Prevent rapid multiple messages
         this.init();
     }
 
@@ -1007,11 +1008,75 @@ class ChatbotAssistant {
             }
         });
 
-        // Quick options
+        // Quick options and other chat buttons
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('quick-option')) {
+                if (this.isProcessing) return; // Prevent rapid clicks
+                
                 const action = e.target.getAttribute('data-action');
-                this.handleQuickOption(action);
+                this.isProcessing = true;
+                
+                // Handle special quote actions
+                if (action?.startsWith('quote_')) {
+                    const productType = action.replace('quote_', '');
+                    this.userData.bagType = productType;
+                    this.showQuoteForm(productType);
+                } else if (action === 'contact_sales') {
+                    this.showContactInfo();
+                } else if (action === 'more_products') {
+                    this.handleQuickOption('product_info');
+                } else if (action === 'new_quote') {
+                    this.resetConversation();
+                    this.handleQuickOption('get_quote');
+                } else if (action === 'modify_order') {
+                    this.modifyCurrentOrder();
+                } else {
+                    this.handleQuickOption(action);
+                }
+                
+                // Reset processing flag after delay
+                setTimeout(() => {
+                    this.isProcessing = false;
+                }, 1000);
+                
+            } else if (e.target.classList.contains('whatsapp-order-btn')) {
+                // Handle WhatsApp button clicks
+                const whatsappUrl = e.target.getAttribute('data-whatsapp-url');
+                if (whatsappUrl) {
+                    // Add visual feedback
+                    e.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening WhatsApp...';
+                    e.target.disabled = true;
+                    
+                    try {
+                        window.open(whatsappUrl, '_blank');
+                        
+                        // Reset button after short delay
+                        setTimeout(() => {
+                            e.target.innerHTML = '<i class="fab fa-whatsapp"></i> Send Order via WhatsApp';
+                            e.target.disabled = false;
+                        }, 2000);
+                    } catch (error) {
+                        console.error('Error opening WhatsApp:', error);
+                        e.target.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error - Try again';
+                        setTimeout(() => {
+                            e.target.innerHTML = '<i class="fab fa-whatsapp"></i> Send Order via WhatsApp';
+                            e.target.disabled = false;
+                        }, 3000);
+                    }
+                } else {
+                    console.error('WhatsApp URL not found');
+                }
+            } else if (e.target.classList.contains('contact-btn')) {
+                // Handle contact buttons (phone/whatsapp)
+                const contactValue = e.target.getAttribute('data-contact-value');
+                const contactType = e.target.getAttribute('data-contact-type');
+                if (contactValue) {
+                    if (contactType === 'phone') {
+                        window.open(contactValue);
+                    } else if (contactType === 'whatsapp') {
+                        window.open(contactValue, '_blank');
+                    }
+                }
             }
         });
     }
@@ -1152,13 +1217,15 @@ class ChatbotAssistant {
         const input = document.getElementById('chatbot-input-field');
         const message = input?.value.trim();
         
-        if (message) {
+        if (message && !this.isProcessing) {
+            this.isProcessing = true;
             this.addUserMessage(message);
             input.value = '';
             
             // Process the message
             setTimeout(() => {
                 this.processUserMessage(message);
+                this.isProcessing = false;
             }, 500);
         }
     }
@@ -1271,16 +1338,53 @@ class ChatbotAssistant {
 
     handleSpecificActions(action) {
         switch (action) {
+            case '100-500':
+            case '500-1000':
             case '1000-5000':
             case '5000-10000':
             case '10000+':
             case 'unsure':
                 this.userData.quantity = action;
-                this.addBotMessage(
-                    "Great! Now, what type of bags are you looking for?",
-                    this.conversationFlow.get_quote.options
-                );
-                this.currentStep = 'bag_type_bulk';
+                
+                if (this.currentStep === 'quantity_selection') {
+                    // User selected quantity after choosing product
+                    this.proceedWithOrder();
+                } else {
+                    // User selected quantity first (bulk order flow)
+                    this.addBotMessage(
+                        "Great! Now, what type of bags are you looking for?",
+                        this.conversationFlow.get_quote.options
+                    );
+                    this.currentStep = 'bag_type_bulk';
+                }
+                break;
+                
+            case 'custom-quantity':
+                this.askForCustomQuantity();
+                break;
+                
+            case 'modify_quantity':
+                if (this.userData.bagType) {
+                    this.askForQuantity(this.userData.bagType);
+                } else {
+                    this.addBotMessage(
+                        "Please select a product first:",
+                        this.conversationFlow.get_quote.options
+                    );
+                }
+                break;
+                
+            case 'confirm_order':
+                if (this.userData.bagType && this.userData.quantity) {
+                    this.generateWhatsAppOrder(this.userData.bagType);
+                } else {
+                    this.addBotMessage(
+                        "Sorry, there seems to be missing information. Let's start over:",
+                        [
+                            { text: "Get a Quote", value: "get_quote" }
+                        ]
+                    );
+                }
                 break;
                 
             case 'shopping':
@@ -1308,6 +1412,120 @@ class ChatbotAssistant {
                     ]
                 );
         }
+    }
+
+    askForCustomQuantity() {
+        this.addBotMessage(
+            "Please tell me the exact quantity you need:",
+            null,
+            800
+        );
+        
+        this.currentStep = 'custom_quantity_input';
+        
+        // Add a note to help user
+        setTimeout(() => {
+            this.addBotMessage(
+                "💡 Just type the number of bags you need (e.g., 750, 2500, etc.)",
+                null,
+                200
+            );
+        }, 1200);
+    }
+
+    proceedWithOrder() {
+        const product = this.productDetails[this.userData.bagType];
+        const quantity = this.userData.quantity;
+        
+        let quantityText = quantity;
+        if (quantity === 'custom-quantity') {
+            quantityText = this.userData.customQuantity || 'Custom quantity';
+        }
+        
+        this.addBotMessage(
+            "🎉 Perfect! I've prepared your order summary:",
+            null,
+            800
+        );
+
+        setTimeout(() => {
+            this.showOrderSummaryCard(product, quantityText, quantity);
+        }, 1200);
+
+        // User will now click "Proceed to WhatsApp" to generate the order
+        this.currentStep = 'order_confirmation';
+    }
+
+    showOrderSummaryCard(product, quantityText, quantity) {
+        const messagesContainer = document.getElementById('chatbot-messages');
+        if (!messagesContainer) return;
+
+        const estimatedPrice = this.getEstimatedPrice(quantity);
+        
+        const orderSummaryHtml = `
+            <div class="order-summary-card compact">
+                <div class="order-header">
+                    <div class="order-icon">
+                        <i class="${product.icon}"></i>
+                    </div>
+                    <div class="order-info">
+                        <h4>${product.name}</h4>
+                        <div class="order-meta">
+                            <span class="order-id">#${Date.now().toString().slice(-6)}</span>
+                            <span class="price-badge">${estimatedPrice}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="order-details">
+                    <div class="detail-item">
+                        <span class="label">📊 Quantity:</span>
+                        <span class="value">${quantityText}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">⭐ Features:</span>
+                        <span class="value">${product.features.slice(0, 2).join(' • ')}</span>
+                    </div>
+                </div>
+                
+                <div class="order-actions">
+                    <button class="quick-option primary-action" data-action="confirm_order">
+                        <i class="fab fa-whatsapp"></i> Send Order
+                    </button>
+                    <button class="quick-option secondary-action" data-action="modify_order">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+            </div>
+        `;
+
+        const orderElement = document.createElement('div');
+        orderElement.className = 'chatbot-message bot-message';
+        orderElement.innerHTML = `
+            <div class="message-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-content order-summary-wrapper">
+                ${orderSummaryHtml}
+            </div>
+        `;
+
+        messagesContainer.appendChild(orderElement);
+        this.scrollToBottom();
+    }
+
+    getEstimatedPrice(quantity) {
+        const priceRanges = {
+            '100-500': '₹15-25 per piece',
+            '500-1000': '₹12-22 per piece', 
+            '1000-5000': '₹10-20 per piece',
+            '5000-10000': '₹8-18 per piece',
+            '10000+': '₹8-15 per piece',
+            'custom-quantity': 'Custom pricing',
+            'unsure': 'Based on final quantity'
+        };
+        
+        return priceRanges[quantity] || 'Contact for pricing';
     }
 
     showProductDetails(productType) {
@@ -1365,43 +1583,79 @@ class ChatbotAssistant {
 
     showQuoteForm(bagType) {
         const product = this.productDetails[bagType];
+        this.userData.bagType = bagType;
+        
         this.addBotMessage(
-            `Perfect! I'll help you get a quote for ${product.name}. Let me prepare the WhatsApp order form for you.`,
+            `Great choice! ${product.name} are excellent for your needs.`,
             null,
-            1000
+            800
         );
 
         setTimeout(() => {
-            this.generateWhatsAppOrder(bagType);
-        }, 1500);
+            this.askForQuantity(bagType);
+        }, 1200);
+    }
+
+    askForQuantity(bagType) {
+        const product = this.productDetails[bagType];
+        
+        this.addBotMessage(
+            `How many ${product.name} do you need? This helps us provide accurate pricing:`,
+            [
+                { text: "100 - 500 pcs", value: "100-500" },
+                { text: "500 - 1,000 pcs", value: "500-1000" },
+                { text: "1,000 - 5,000 pcs", value: "1000-5000" },
+                { text: "5,000 - 10,000 pcs", value: "5000-10000" },
+                { text: "10,000+ pcs", value: "10000+" },
+                { text: "Custom Quantity", value: "custom-quantity" }
+            ],
+            1000
+        );
+        
+        this.currentStep = 'quantity_selection';
     }
 
     generateWhatsAppOrder(bagType) {
         const product = this.productDetails[bagType];
-        const quantity = this.userData.quantity || 'To be discussed';
+        let quantityText = this.userData.quantity || 'To be discussed';
+        
+        // Format quantity for display
+        if (this.userData.quantity === 'custom-quantity' && this.userData.customQuantity) {
+            quantityText = this.userData.customQuantity;
+        } else if (this.userData.quantity && this.userData.quantity !== 'unsure') {
+            quantityText = `${this.userData.quantity} pieces`;
+        } else if (this.userData.quantity === 'unsure') {
+            quantityText = 'Quantity to be discussed';
+        }
+        
+        const estimatedPrice = this.getEstimatedPrice(this.userData.quantity);
         
         const orderDetails = `
 Hi Srivenkateshwara NON Woven Bags,
 
 I'm interested in placing an order through your website chatbot:
 
-📦 Product: ${product.name}
-📊 Quantity: ${quantity}
-💰 Pricing: ${product.pricing}
+📦 Product Type: ${product.name}
+📊 Quantity Needed: ${quantityText}
+💰 Expected Price Range: ${estimatedPrice}
+📋 Product Features: ${product.features.join(', ')}
 
 Please provide me with:
-✅ Detailed quote
-✅ Delivery timeline  
-✅ Customization options
-✅ Payment terms
+✅ Detailed quote with exact pricing
+✅ Delivery timeline and shipping cost
+✅ Customization options (logo printing, colors)
+✅ Payment terms and methods
+✅ Sample availability
 
-Thank you!
+Additional Requirements: [Please specify any special requirements]
+
+Thank you for your quick response!
         `.trim();
 
         const whatsappUrl = `https://wa.me/916302067390?text=${encodeURIComponent(orderDetails)}`;
         
         const whatsappButtonHtml = `
-            <button class="whatsapp-order-btn" onclick="window.open('${whatsappUrl}', '_blank')">
+            <button class="whatsapp-order-btn" data-whatsapp-url="${whatsappUrl}">
                 <i class="fab fa-whatsapp"></i>
                 Send Order via WhatsApp
             </button>
@@ -1429,8 +1683,9 @@ Thank you!
                             This will open WhatsApp with your order details pre-filled. Our team typically responds within 2 hours!
                         </p>
                         <div class="quick-options">
-                            <button class="quick-option" data-action="get_quote">New Quote</button>
+                            <button class="quick-option" data-action="new_quote">New Quote</button>
                             <button class="quick-option" data-action="contact_sales">Call Sales</button>
+                            <button class="quick-option" data-action="modify_order">Modify This Order</button>
                         </div>
                     </div>
                 `;
@@ -1442,6 +1697,33 @@ Thank you!
 
     processUserMessage(message) {
         const lowerMessage = message.toLowerCase();
+        
+        // Handle custom quantity input
+        if (this.currentStep === 'custom_quantity_input') {
+            const quantity = message.replace(/[^\d]/g, ''); // Extract numbers only
+            if (quantity && parseInt(quantity) > 0) {
+                this.userData.quantity = 'custom-quantity';
+                this.userData.customQuantity = `${parseInt(quantity).toLocaleString()} pieces`;
+                
+                this.addBotMessage(
+                    `Got it! ${this.userData.customQuantity} is noted. Let me prepare your quote.`,
+                    null,
+                    800
+                );
+                
+                setTimeout(() => {
+                    this.proceedWithOrder();
+                }, 1200);
+                return;
+            } else {
+                this.addBotMessage(
+                    "Please enter a valid number (e.g., 750, 2500). How many bags do you need?",
+                    null,
+                    800
+                );
+                return;
+            }
+        }
         
         // Intent recognition
         if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('quote')) {
@@ -1504,10 +1786,10 @@ Thank you!
                             <p style="margin: 5px 0;">✉️ srivenkateshwaranonwovenbags6@gmail.com</p>
                         </div>
                         <div class="quick-options">
-                            <button class="quick-option" onclick="window.open('tel:+916302067390')">
+                            <button class="quick-option contact-btn" data-contact-type="phone" data-contact-value="tel:+916302067390">
                                 <i class="fas fa-phone"></i> Call Now
                             </button>
-                            <button class="quick-option" onclick="window.open('https://wa.me/916302067390?text=Hi%20I%20need%20help%20with%20non-woven%20bags', '_blank')">
+                            <button class="quick-option contact-btn" data-contact-type="whatsapp" data-contact-value="https://wa.me/916302067390?text=Hi%20I%20need%20help%20with%20non-woven%20bags">
                                 <i class="fab fa-whatsapp"></i> WhatsApp
                             </button>
                         </div>
@@ -1526,6 +1808,38 @@ Thank you!
         }
     }
 
+    resetConversation() {
+        this.userData = {};
+        this.currentStep = 'initial';
+        this.isProcessing = false;
+        
+        this.addBotMessage(
+            "🔄 Starting fresh! What would you like to know about our non-woven bags?",
+            [
+                { text: "Get a Quote", value: "get_quote" },
+                { text: "Product Information", value: "product_info" },
+                { text: "Bulk Orders", value: "bulk_order" }
+            ],
+            600
+        );
+    }
+
+    modifyCurrentOrder() {
+        const product = this.productDetails[this.userData.bagType];
+        
+        this.addBotMessage(
+            `Current selection: ${product?.name || 'No product selected'}
+            
+What would you like to modify?`,
+            [
+                { text: "Change Product Type", value: "get_quote" },
+                { text: "Change Quantity", value: "modify_quantity" },
+                { text: "Start Over", value: "new_quote" }
+            ],
+            800
+        );
+    }
+
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
@@ -1538,15 +1852,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.chatbot = new ChatbotAssistant();
 });
 
-// Handle quote actions with specific product types
-document.addEventListener('click', (e) => {
-    if (e.target.getAttribute('data-action')?.startsWith('quote_')) {
-        const productType = e.target.getAttribute('data-action').replace('quote_', '');
-        window.chatbot.userData.bagType = productType;
-        window.chatbot.showQuoteForm(productType);
-    } else if (e.target.getAttribute('data-action') === 'contact_sales') {
-        window.chatbot.showContactInfo();
-    } else if (e.target.getAttribute('data-action') === 'more_products') {
-        window.chatbot.handleQuickOption('product_info');
-    }
-}); 
+// Additional event handling is now integrated into the main ChatbotAssistant class 
