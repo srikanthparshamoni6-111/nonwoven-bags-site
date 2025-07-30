@@ -961,3 +961,592 @@ window.addEventListener('error', (e) => {
 if (window.history.replaceState) {
     window.history.replaceState(null, null, window.location.href);
 } 
+
+// ================================
+// CHATBOT FUNCTIONALITY
+// ================================
+
+class ChatbotAssistant {
+    constructor() {
+        this.isOpen = false;
+        this.currentStep = 'initial';
+        this.userData = {};
+        this.conversationFlow = {};
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+        this.setupConversationFlow();
+        // Show notification after 3 seconds
+        setTimeout(() => {
+            this.showNotification();
+        }, 3000);
+    }
+
+    bindEvents() {
+        // Toggle chatbot
+        document.getElementById('chatbot-button')?.addEventListener('click', () => {
+            this.toggleChatbot();
+        });
+
+        // Close chatbot
+        document.getElementById('chatbot-close')?.addEventListener('click', () => {
+            this.closeChatbot();
+        });
+
+        // Send message
+        document.getElementById('chatbot-send')?.addEventListener('click', () => {
+            this.sendMessage();
+        });
+
+        // Enter key to send
+        document.getElementById('chatbot-input-field')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.sendMessage();
+            }
+        });
+
+        // Quick options
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('quick-option')) {
+                const action = e.target.getAttribute('data-action');
+                this.handleQuickOption(action);
+            }
+        });
+    }
+
+    setupConversationFlow() {
+        this.conversationFlow = {
+            get_quote: {
+                message: "Great! I'll help you get a quote. What type of bags are you interested in?",
+                options: [
+                    { text: "Shopping Bags", value: "shopping", icon: "fas fa-shopping-bag" },
+                    { text: "Promotional Bags", value: "promotional", icon: "fas fa-gift" },
+                    { text: "Food Grade Bags", value: "food-grade", icon: "fas fa-utensils" },
+                    { text: "Industrial Bags", value: "industrial", icon: "fas fa-box" },
+                    { text: "Agricultural Bags", value: "agricultural", icon: "fas fa-seedling" },
+                    { text: "Custom Design", value: "custom", icon: "fas fa-palette" }
+                ],
+                nextStep: 'quantity_selection'
+            },
+            product_info: {
+                message: "I'd be happy to share information about our products! Which category interests you?",
+                options: [
+                    { text: "Shopping Bags", value: "shopping", icon: "fas fa-shopping-bag" },
+                    { text: "Promotional Bags", value: "promotional", icon: "fas fa-gift" },
+                    { text: "Food Grade Bags", value: "food-grade", icon: "fas fa-utensils" },
+                    { text: "Industrial Bags", value: "industrial", icon: "fas fa-box" },
+                    { text: "Agricultural Bags", value: "agricultural", icon: "fas fa-seedling" },
+                    { text: "Garment Bags", value: "garment", icon: "fas fa-tshirt" }
+                ],
+                nextStep: 'product_details'
+            },
+            bulk_order: {
+                message: "Perfect! We specialize in bulk orders. Let me get some details to provide you with the best pricing.",
+                options: [
+                    { text: "1,000 - 5,000 pcs", value: "1000-5000" },
+                    { text: "5,000 - 10,000 pcs", value: "5000-10000" },
+                    { text: "10,000+ pcs", value: "10000+" },
+                    { text: "Not sure yet", value: "unsure" }
+                ],
+                nextStep: 'bag_type_bulk'
+            }
+        };
+
+        this.productDetails = {
+            shopping: {
+                name: "Shopping Bags",
+                description: "Durable and stylish shopping bags perfect for retail stores and supermarkets.",
+                features: ["Multiple size options", "Reinforced handles", "Custom printing available"],
+                pricing: "₹12-25 per piece (depending on quantity and customization)",
+                icon: "fas fa-shopping-bag"
+            },
+            promotional: {
+                name: "Promotional Bags",
+                description: "Eye-catching promotional bags ideal for marketing campaigns and brand awareness.",
+                features: ["Full-color printing", "Logo placement", "Brand customization"],
+                pricing: "₹15-30 per piece (depending on design complexity)",
+                icon: "fas fa-gift"
+            },
+            "food-grade": {
+                name: "Food Grade Bags",
+                description: "Food-safe non-woven bags designed for restaurants, cafes, and food delivery services.",
+                features: ["Food-grade materials", "Leak-resistant", "Temperature resistant"],
+                pricing: "₹18-35 per piece (meets all safety standards)",
+                icon: "fas fa-utensils"
+            },
+            industrial: {
+                name: "Industrial Bags",
+                description: "Heavy-duty bags for industrial applications. Built to withstand demanding environments.",
+                features: ["High tensile strength", "Chemical resistant", "Custom specifications"],
+                pricing: "₹20-45 per piece (based on specifications)",
+                icon: "fas fa-box"
+            },
+            agricultural: {
+                name: "Agricultural Bags",
+                description: "Specialized bags for agricultural use including seed storage and fertilizer packaging.",
+                features: ["UV resistant", "Moisture protection", "Breathable options"],
+                pricing: "₹15-30 per piece (various sizes available)",
+                icon: "fas fa-seedling"
+            },
+            garment: {
+                name: "Garment Bags",
+                description: "Protective bags for clothing and textile industry.",
+                features: ["Dust protection", "Breathable fabric", "Various sizes"],
+                pricing: "₹12-25 per piece (perfect for textile industry)",
+                icon: "fas fa-tshirt"
+            },
+            custom: {
+                name: "Custom Design Bags",
+                description: "Fully customizable bags designed to your exact specifications.",
+                features: ["Any size/shape", "Custom colors", "Logo printing", "Special materials"],
+                pricing: "₹20-50 per piece (based on design complexity)",
+                icon: "fas fa-palette"
+            }
+        };
+    }
+
+    toggleChatbot() {
+        const container = document.getElementById('chatbot-container');
+        const notification = document.getElementById('chatbot-notification');
+        
+        if (this.isOpen) {
+            this.closeChatbot();
+        } else {
+            this.openChatbot();
+            if (notification) {
+                notification.style.display = 'none';
+            }
+        }
+    }
+
+    openChatbot() {
+        const container = document.getElementById('chatbot-container');
+        if (container) {
+            container.classList.add('active');
+            this.isOpen = true;
+            // Focus on input field
+            setTimeout(() => {
+                document.getElementById('chatbot-input-field')?.focus();
+            }, 300);
+        }
+    }
+
+    closeChatbot() {
+        const container = document.getElementById('chatbot-container');
+        if (container) {
+            container.classList.remove('active');
+            this.isOpen = false;
+        }
+    }
+
+    showNotification() {
+        const notification = document.getElementById('chatbot-notification');
+        if (notification && !this.isOpen) {
+            notification.style.display = 'flex';
+        }
+    }
+
+    sendMessage() {
+        const input = document.getElementById('chatbot-input-field');
+        const message = input?.value.trim();
+        
+        if (message) {
+            this.addUserMessage(message);
+            input.value = '';
+            
+            // Process the message
+            setTimeout(() => {
+                this.processUserMessage(message);
+            }, 500);
+        }
+    }
+
+    addUserMessage(message) {
+        const messagesContainer = document.getElementById('chatbot-messages');
+        if (!messagesContainer) return;
+
+        const messageElement = document.createElement('div');
+        messageElement.className = 'chatbot-message user-message';
+        messageElement.innerHTML = `
+            <div class="message-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="message-content">
+                <p>${this.escapeHtml(message)}</p>
+            </div>
+        `;
+
+        messagesContainer.appendChild(messageElement);
+        this.scrollToBottom();
+    }
+
+    addBotMessage(message, options = null, delay = 1000) {
+        // Show typing indicator first
+        this.showTypingIndicator();
+        
+        setTimeout(() => {
+            this.hideTypingIndicator();
+            
+            const messagesContainer = document.getElementById('chatbot-messages');
+            if (!messagesContainer) return;
+
+            const messageElement = document.createElement('div');
+            messageElement.className = 'chatbot-message bot-message';
+            
+            let optionsHtml = '';
+            if (options && options.length > 0) {
+                optionsHtml = '<div class="quick-options">';
+                options.forEach(option => {
+                    if (option.icon) {
+                        optionsHtml += `<button class="quick-option" data-action="${option.value}">
+                            <i class="${option.icon}"></i> ${option.text}
+                        </button>`;
+                    } else {
+                        optionsHtml += `<button class="quick-option" data-action="${option.value}">${option.text}</button>`;
+                    }
+                });
+                optionsHtml += '</div>';
+            }
+
+            messageElement.innerHTML = `
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <p>${message}</p>
+                    ${optionsHtml}
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageElement);
+            this.scrollToBottom();
+        }, delay);
+    }
+
+    showTypingIndicator() {
+        const messagesContainer = document.getElementById('chatbot-messages');
+        if (!messagesContainer) return;
+
+        const typingElement = document.createElement('div');
+        typingElement.className = 'chatbot-message bot-message typing-message';
+        typingElement.innerHTML = `
+            <div class="message-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-content">
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        `;
+
+        messagesContainer.appendChild(typingElement);
+        this.scrollToBottom();
+    }
+
+    hideTypingIndicator() {
+        const typingMessage = document.querySelector('.typing-message');
+        if (typingMessage) {
+            typingMessage.remove();
+        }
+    }
+
+    handleQuickOption(action) {
+        // Handle different quick option actions
+        if (this.conversationFlow[action]) {
+            const flow = this.conversationFlow[action];
+            this.addBotMessage(flow.message, flow.options);
+            this.currentStep = action;
+        } else if (this.productDetails[action]) {
+            this.showProductDetails(action);
+        } else {
+            // Handle other actions
+            this.handleSpecificActions(action);
+        }
+    }
+
+    handleSpecificActions(action) {
+        switch (action) {
+            case '1000-5000':
+            case '5000-10000':
+            case '10000+':
+            case 'unsure':
+                this.userData.quantity = action;
+                this.addBotMessage(
+                    "Great! Now, what type of bags are you looking for?",
+                    this.conversationFlow.get_quote.options
+                );
+                this.currentStep = 'bag_type_bulk';
+                break;
+                
+            case 'shopping':
+            case 'promotional':
+            case 'food-grade':
+            case 'industrial':
+            case 'agricultural':
+            case 'garment':
+            case 'custom':
+                if (this.currentStep === 'bag_type_bulk' || this.currentStep === 'get_quote') {
+                    this.userData.bagType = action;
+                    this.showQuoteForm(action);
+                } else {
+                    this.showProductDetails(action);
+                }
+                break;
+                
+            default:
+                this.addBotMessage(
+                    "I'm sorry, I didn't understand that. Let me help you with:",
+                    [
+                        { text: "Get a Quote", value: "get_quote" },
+                        { text: "Product Information", value: "product_info" },
+                        { text: "Contact Sales", value: "contact_sales" }
+                    ]
+                );
+        }
+    }
+
+    showProductDetails(productType) {
+        const product = this.productDetails[productType];
+        if (!product) return;
+
+        const featuresHtml = product.features.map(feature => `• ${feature}`).join('<br>');
+        
+        const productCardHtml = `
+            <div class="chat-product-card">
+                <div class="chat-product-header">
+                    <div class="chat-product-icon">
+                        <i class="${product.icon}"></i>
+                    </div>
+                    <h4 class="chat-product-name">${product.name}</h4>
+                </div>
+                <p class="chat-product-description">${product.description}</p>
+                <br>
+                <strong>Key Features:</strong><br>
+                ${featuresHtml}
+                <br><br>
+                <strong>Pricing:</strong> ${product.pricing}
+            </div>
+        `;
+
+        this.addBotMessage(
+            `Here's detailed information about ${product.name}:`,
+            null,
+            800
+        );
+
+        setTimeout(() => {
+            const messagesContainer = document.getElementById('chatbot-messages');
+            if (messagesContainer) {
+                const productElement = document.createElement('div');
+                productElement.className = 'chatbot-message bot-message';
+                productElement.innerHTML = `
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        ${productCardHtml}
+                        <div class="quick-options" style="margin-top: 15px;">
+                            <button class="quick-option" data-action="quote_${productType}">Get Quote for This</button>
+                            <button class="quick-option" data-action="contact_sales">Contact Sales</button>
+                            <button class="quick-option" data-action="more_products">Other Products</button>
+                        </div>
+                    </div>
+                `;
+                messagesContainer.appendChild(productElement);
+                this.scrollToBottom();
+            }
+        }, 1200);
+    }
+
+    showQuoteForm(bagType) {
+        const product = this.productDetails[bagType];
+        this.addBotMessage(
+            `Perfect! I'll help you get a quote for ${product.name}. Let me prepare the WhatsApp order form for you.`,
+            null,
+            1000
+        );
+
+        setTimeout(() => {
+            this.generateWhatsAppOrder(bagType);
+        }, 1500);
+    }
+
+    generateWhatsAppOrder(bagType) {
+        const product = this.productDetails[bagType];
+        const quantity = this.userData.quantity || 'To be discussed';
+        
+        const orderDetails = `
+Hi Srivenkateshwara NON Woven Bags,
+
+I'm interested in placing an order through your website chatbot:
+
+📦 Product: ${product.name}
+📊 Quantity: ${quantity}
+💰 Pricing: ${product.pricing}
+
+Please provide me with:
+✅ Detailed quote
+✅ Delivery timeline  
+✅ Customization options
+✅ Payment terms
+
+Thank you!
+        `.trim();
+
+        const whatsappUrl = `https://wa.me/916302067390?text=${encodeURIComponent(orderDetails)}`;
+        
+        const whatsappButtonHtml = `
+            <button class="whatsapp-order-btn" onclick="window.open('${whatsappUrl}', '_blank')">
+                <i class="fab fa-whatsapp"></i>
+                Send Order via WhatsApp
+            </button>
+        `;
+
+        this.addBotMessage(
+            "🎉 Your order details are ready! Click the button below to send this directly to our WhatsApp for immediate processing:",
+            null,
+            500
+        );
+
+        setTimeout(() => {
+            const messagesContainer = document.getElementById('chatbot-messages');
+            if (messagesContainer) {
+                const whatsappElement = document.createElement('div');
+                whatsappElement.className = 'chatbot-message bot-message';
+                whatsappElement.innerHTML = `
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        ${whatsappButtonHtml}
+                        <p style="font-size: 12px; color: #6c757d; margin-top: 10px;">
+                            <i class="fas fa-info-circle"></i> 
+                            This will open WhatsApp with your order details pre-filled. Our team typically responds within 2 hours!
+                        </p>
+                        <div class="quick-options">
+                            <button class="quick-option" data-action="get_quote">New Quote</button>
+                            <button class="quick-option" data-action="contact_sales">Call Sales</button>
+                        </div>
+                    </div>
+                `;
+                messagesContainer.appendChild(whatsappElement);
+                this.scrollToBottom();
+            }
+        }, 1000);
+    }
+
+    processUserMessage(message) {
+        const lowerMessage = message.toLowerCase();
+        
+        // Intent recognition
+        if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('quote')) {
+            this.handleQuickOption('get_quote');
+        } else if (lowerMessage.includes('product') || lowerMessage.includes('bag') || lowerMessage.includes('type')) {
+            this.handleQuickOption('product_info');
+        } else if (lowerMessage.includes('bulk') || lowerMessage.includes('wholesale') || lowerMessage.includes('large order')) {
+            this.handleQuickOption('bulk_order');
+        } else if (lowerMessage.includes('contact') || lowerMessage.includes('phone') || lowerMessage.includes('call')) {
+            this.showContactInfo();
+        } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+            this.addBotMessage(
+                "Hello! 👋 Welcome to Srivenkateshwara NON Woven Bags. How can I assist you today?",
+                [
+                    { text: "Get a Quote", value: "get_quote" },
+                    { text: "Product Info", value: "product_info" },
+                    { text: "Bulk Orders", value: "bulk_order" }
+                ]
+            );
+        } else {
+            this.addBotMessage(
+                "I'd be happy to help you with that! Let me know what you're looking for:",
+                [
+                    { text: "Get Quote & Pricing", value: "get_quote" },
+                    { text: "Product Information", value: "product_info" },
+                    { text: "Bulk Order Inquiry", value: "bulk_order" },
+                    { text: "Contact Sales Team", value: "contact_sales" }
+                ]
+            );
+        }
+    }
+
+    showContactInfo() {
+        this.addBotMessage(
+            "Here are our contact details for immediate assistance:",
+            null,
+            800
+        );
+
+        setTimeout(() => {
+            const messagesContainer = document.getElementById('chatbot-messages');
+            if (messagesContainer) {
+                const contactElement = document.createElement('div');
+                contactElement.className = 'chatbot-message bot-message';
+                contactElement.innerHTML = `
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin: 8px 0;">
+                            <h4 style="margin: 0 0 10px 0; color: #2c5530;">
+                                <i class="fas fa-phone"></i> Sales & Marketing
+                            </h4>
+                            <p style="margin: 5px 0;">📞 <strong>Srikanth & Shiva Sai</strong></p>
+                            <p style="margin: 5px 0;">📱 +91 6302067390</p>
+                            <br>
+                            <h4 style="margin: 10px 0 10px 0; color: #2c5530;">
+                                <i class="fas fa-envelope"></i> Email
+                            </h4>
+                            <p style="margin: 5px 0;">✉️ srivenkateshwaranonwovenbags6@gmail.com</p>
+                        </div>
+                        <div class="quick-options">
+                            <button class="quick-option" onclick="window.open('tel:+916302067390')">
+                                <i class="fas fa-phone"></i> Call Now
+                            </button>
+                            <button class="quick-option" onclick="window.open('https://wa.me/916302067390?text=Hi%20I%20need%20help%20with%20non-woven%20bags', '_blank')">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                `;
+                messagesContainer.appendChild(contactElement);
+                this.scrollToBottom();
+            }
+        }, 1200);
+    }
+
+    scrollToBottom() {
+        const messagesContainer = document.getElementById('chatbot-messages');
+        if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+// Initialize chatbot when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.chatbot = new ChatbotAssistant();
+});
+
+// Handle quote actions with specific product types
+document.addEventListener('click', (e) => {
+    if (e.target.getAttribute('data-action')?.startsWith('quote_')) {
+        const productType = e.target.getAttribute('data-action').replace('quote_', '');
+        window.chatbot.userData.bagType = productType;
+        window.chatbot.showQuoteForm(productType);
+    } else if (e.target.getAttribute('data-action') === 'contact_sales') {
+        window.chatbot.showContactInfo();
+    } else if (e.target.getAttribute('data-action') === 'more_products') {
+        window.chatbot.handleQuickOption('product_info');
+    }
+}); 

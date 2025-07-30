@@ -764,5 +764,58 @@
             }, 100);
         });
     </script>
+    <!-- Chatbot Widget -->
+    <div id="chatbot-widget">
+        <div id="chatbot-button" class="chatbot-button">
+            <i class="fas fa-comments"></i>
+            <span class="chatbot-text">Chat with us</span>
+            <div class="chatbot-notification" id="chatbot-notification">1</div>
+        </div>
+        
+        <div id="chatbot-container" class="chatbot-container">
+            <div class="chatbot-header">
+                <div class="chatbot-header-info">
+                    <div class="chatbot-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="chatbot-title">
+                        <h4>SV Bags Assistant</h4>
+                        <span class="chatbot-status">Online • Typically replies instantly</span>
+                    </div>
+                </div>
+                <button id="chatbot-close" class="chatbot-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="chatbot-message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>👋 Hello! I'm here to help you find the perfect non-woven bags for your needs.</p>
+                        <p>What brings you here today?</p>
+                        <div class="quick-options">
+                            <button class="quick-option" data-action="get_quote">Get a Quote</button>
+                            <button class="quick-option" data-action="product_info">Product Info</button>
+                            <button class="quick-option" data-action="bulk_order">Bulk Orders</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chatbot-input">
+                <input type="text" id="chatbot-input-field" placeholder="Type your message..." maxlength="500">
+                <button id="chatbot-send" class="chatbot-send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            
+            <div class="chatbot-footer">
+                <span>Powered by SV Bags AI Assistant</span>
+            </div>
+        </div>
+    </div>
 </body>
 </html> 
