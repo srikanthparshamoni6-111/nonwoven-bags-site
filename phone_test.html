@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Number Validation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .valid {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .invalid {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .phone-input {
+            font-family: monospace;
+            min-width: 200px;
+        }
+        .status {
+            font-weight: bold;
+            min-width: 80px;
+        }
+        .test-input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 300px;
+            font-size: 16px;
+        }
+        .test-button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📞 Phone Number Validation Test</h2>
+        <p>This tests the new flexible phone number validation system that accepts various international formats.</p>
+        
+        <div style="margin: 20px 0;">
+            <h3>🧪 Test Your Own Number:</h3>
+            <input type="tel" id="testPhone" class="test-input" placeholder="Enter any phone number format">
+            <button onclick="testNumber()" class="test-button">Test Validation</button>
+            <div id="testResult"></div>
+        </div>
+        
+        <h3>✅ These Formats Should Work:</h3>
+        <div id="validTests"></div>
+        
+        <h3>❌ These Should Be Invalid:</h3>
+        <div id="invalidTests"></div>
+    </div>
+
+    <script>
+        // Copy the new validation function
+        function isValidPhone(phone) {
+            // Remove all non-digit characters except + for country code
+            const cleanPhone = phone.replace(/[^\d+]/g, '');
+            
+            // Check for various valid phone number patterns
+            const phonePatterns = [
+                // International format with country code (e.g., +91 9876543210, +1 234 567 8900)
+                /^\+\d{1,4}\d{6,14}$/,
+                
+                // Indian mobile numbers (10 digits, starting with 6-9)
+                /^[6-9]\d{9}$/,
+                
+                // Indian landline with STD code (10-11 digits)
+                /^[0-9]{10,11}$/,
+                
+                // US/Canada format (10 digits)
+                /^\d{10}$/,
+                
+                // General international (7-15 digits, with or without country code)
+                /^(\+\d{1,4})?\d{6,14}$/
+            ];
+            
+            // Check if phone number matches any valid pattern
+            const isValid = phonePatterns.some(pattern => pattern.test(cleanPhone));
+            
+            // Additional check: must have at least 7 digits and max 19 digits (including country code)
+            const digitCount = cleanPhone.replace(/\+/g, '').length;
+            
+            return isValid && digitCount >= 7 && digitCount <= 19;
+        }
+
+        // Test cases
+        const validNumbers = [
+            '+91 9876543210',
+            '+91-9876543210',
+            '+91 (987) 654-3210',
+            '9876543210',
+            '+1 234 567 8900',
+            '+44 20 7946 0958',
+            '+33 1 42 86 83 26',
+            '+81 90 1234 5678',
+            '011 2345 6789',
+            '9876-543-210',
+            '(987) 654-3210',
+            '+49 30 12345678',
+            '7894561230'
+        ];
+
+        const invalidNumbers = [
+            '123',
+            'abc123def',
+            '+',
+            '123456789012345678901',
+            '',
+            '++91 9876543210',
+            '12345',
+            'phone number'
+        ];
+
+        function createTestItem(phone, isValid) {
+            const div = document.createElement('div');
+            div.className = `test-item ${isValid ? 'valid' : 'invalid'}`;
+            div.innerHTML = `
+                <span class="phone-input">${phone}</span>
+                <span class="status">${isValid ? '✅ VALID' : '❌ INVALID'}</span>
+                <span>→ ${phone.replace(/[^\d+]/g, '')}</span>
+            `;
+            return div;
+        }
+
+        function testNumber() {
+            const input = document.getElementById('testPhone');
+            const result = document.getElementById('testResult');
+            const phone = input.value.trim();
+            
+            if (!phone) {
+                result.innerHTML = '<div class="result" style="background: #fff3cd; border: 1px solid #ffeaa7;">Please enter a phone number</div>';
+                return;
+            }
+            
+            const isValid = isValidPhone(phone);
+            const cleaned = phone.replace(/[^\d+]/g, '');
+            
+            result.innerHTML = `
+                <div class="result ${isValid ? 'valid' : 'invalid'}">
+                    <strong>${isValid ? '✅ VALID' : '❌ INVALID'}</strong><br>
+                    Original: ${phone}<br>
+                    Cleaned: ${cleaned}<br>
+                    Length: ${cleaned.replace(/\+/g, '').length} digits
+                </div>
+            `;
+        }
+
+        // Run tests on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const validContainer = document.getElementById('validTests');
+            const invalidContainer = document.getElementById('invalidTests');
+            
+            validNumbers.forEach(phone => {
+                const isActuallyValid = isValidPhone(phone);
+                const item = createTestItem(phone, isActuallyValid);
+                if (!isActuallyValid) {
+                    item.style.background = '#fff3cd';
+                    item.innerHTML += ' <strong>(UNEXPECTED!)</strong>';
+                }
+                validContainer.appendChild(item);
+            });
+            
+            invalidNumbers.forEach(phone => {
+                const isActuallyValid = isValidPhone(phone);
+                const item = createTestItem(phone, !isActuallyValid);
+                if (isActuallyValid) {
+                    item.style.background = '#fff3cd';
+                    item.innerHTML += ' <strong>(UNEXPECTED!)</strong>';
+                }
+                invalidContainer.appendChild(item);
+            });
+        });
+    </script>
+</body>
+</html> 

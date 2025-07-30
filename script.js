@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Order form handling with enhanced functionality
+// Order form handling with WhatsApp-first approach
 const orderForm = document.getElementById('orderForm');
 if (orderForm) {
     orderForm.addEventListener('submit', function(e) {
@@ -290,10 +290,10 @@ if (orderForm) {
             return;
         }
         
-        // Show loading state
+        // Show processing state
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Order...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening WhatsApp...';
         submitBtn.classList.add('loading');
         
         // Get form data
@@ -303,66 +303,25 @@ if (orderForm) {
             orderData[key] = value;
         });
         
-        // Send to email service
-        fetch('https://formspree.io/f/mjvqgord', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: 'srivenkateshwaranonwovenbags6@gmail.com',
-                subject: `🛍️ NEW ORDER REQUEST - ${orderData.bagType}`,
-                message: `
-🛍️ NEW ORDER REQUEST
-
-👤 CUSTOMER DETAILS:
-• Name: ${orderData.name}
-• Phone: ${orderData.phone}
-• Email: ${orderData.email}
-• Company: ${orderData.company || 'N/A'}
-
-📦 ORDER DETAILS:
-• Bag Type: ${orderData.bagType}
-• Quantity: ${orderData.quantity}
-• Delivery Timeline: ${orderData.urgency || 'Standard (14 days)'}
-• Special Requirements: ${orderData.message || 'None'}
-
-📅 Order Date: ${new Date().toLocaleDateString()}
-⏰ Order Time: ${new Date().toLocaleTimeString()}
-
-🎯 ACTION REQUIRED: Please contact the customer within 2 hours with a detailed quote.
-
-This order was submitted through the website order form.
-                `,
-                _replyto: orderData.email,
-                _subject: `New Order Request - ${orderData.bagType}`,
-            }),
-        })
-        .then(response => {
-            // Always send to WhatsApp for immediate notification
-            sendToWhatsApp(orderData);
-            
+        // Immediately open WhatsApp (primary method)
+        openWhatsAppOrder(orderData);
+        
+        // Send email silently in background for record keeping
+        sendEmailRecord(orderData);
+        
+        // Reset form and show success
+        setTimeout(() => {
             submitBtn.innerHTML = originalText;
             submitBtn.classList.remove('loading');
             
-            showOrderMessage('🎉 Order submitted successfully! We\'ve received your order and will contact you within 2 hours. Check WhatsApp for instant confirmation!', 'success');
+            showOrderMessage('🎉 Order sent via WhatsApp! Our team will respond within 2 hours with a detailed quote. Thank you!', 'success');
             orderForm.reset();
-        })
-        .catch(error => {
-            console.log('Fallback: Sending to WhatsApp only');
-            sendToWhatsApp(orderData);
-            
-            submitBtn.innerHTML = originalText;
-            submitBtn.classList.remove('loading');
-            
-            showOrderMessage('✅ Order received! Your details have been sent via WhatsApp. Our team will contact you within 2 hours with a detailed quote.', 'success');
-            orderForm.reset();
-        });
+        }, 1000);
     });
 }
 
-// Enhanced WhatsApp integration
-function sendToWhatsApp(orderData) {
+// Primary method: Open WhatsApp immediately
+function openWhatsAppOrder(orderData) {
     const whatsappMessage = `
 🛍️ *NEW ORDER REQUEST* 🛍️
 
@@ -370,28 +329,76 @@ function sendToWhatsApp(orderData) {
 • Name: ${orderData.name}
 • Phone: ${orderData.phone}
 • Email: ${orderData.email}
-• Company: ${orderData.company || 'N/A'}
+• Company: ${orderData.company || 'Individual Customer'}
 
 📦 *Order Details:*
 • Bag Type: ${orderData.bagType}
 • Quantity: ${orderData.quantity}
-• Timeline: ${orderData.urgency || 'Standard (14 days)'}
-• Requirements: ${orderData.message || 'None'}
+• Delivery Timeline: ${orderData.urgency || 'Standard (14 days)'}
+• Special Requirements: ${orderData.message || 'None specified'}
 
-📅 Date: ${new Date().toLocaleDateString()}
-⏰ Time: ${new Date().toLocaleTimeString()}
+📅 Order Date: ${new Date().toLocaleDateString()}
+⏰ Order Time: ${new Date().toLocaleTimeString()}
 
-🎯 *Action Required:* Please respond with quote within 2 hours.
+🎯 *Next Steps:*
+Please provide a detailed quote with:
+• Final pricing
+• Available customization options
+• Confirmed delivery timeline
+• Any additional requirements
 
-*Order submitted through website.*
+*Thank you for choosing Srivenkateshwara NON Woven Bags!*
     `.trim();
     
     const whatsappLink = `https://wa.me/916302067390?text=${encodeURIComponent(whatsappMessage)}`;
     
-    // Auto-open WhatsApp after 1.5 seconds
-    setTimeout(() => {
-        window.open(whatsappLink, '_blank');
-    }, 1500);
+    // Open WhatsApp in new tab
+    window.open(whatsappLink, '_blank');
+}
+
+// Background method: Send email for record keeping (silent)
+function sendEmailRecord(orderData) {
+    // Silently send email for business records - no user feedback on success/failure
+    const emailBody = `
+🛍️ NEW ORDER REQUEST - RECORD COPY
+
+👤 CUSTOMER DETAILS:
+• Name: ${orderData.name}
+• Phone: ${orderData.phone}
+• Email: ${orderData.email}
+• Company: ${orderData.company || 'Individual Customer'}
+
+📦 ORDER DETAILS:
+• Bag Type: ${orderData.bagType}
+• Quantity: ${orderData.quantity}
+• Delivery Timeline: ${orderData.urgency || 'Standard (14 days)'}
+• Special Requirements: ${orderData.message || 'None specified'}
+
+📅 Order Date: ${new Date().toLocaleDateString()}
+⏰ Order Time: ${new Date().toLocaleTimeString()}
+
+🎯 STATUS: Order sent via WhatsApp to customer
+📱 WhatsApp: +91 6302067390
+
+This is an automated record copy. Primary communication is via WhatsApp.
+    `;
+
+    fetch('https://formspree.io/f/mjvqgord', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            email: 'srivenkateshwaranonwovenbags6@gmail.com',
+            subject: `📝 Order Record - ${orderData.bagType} (${orderData.quantity})`,
+            message: emailBody,
+            _replyto: orderData.email,
+        }),
+    })
+    .catch(error => {
+        // Silent fail - email is just for records, not critical
+        console.log('Email record failed (non-critical):', error);
+    });
 }
 
 // Enhanced order form validation
@@ -408,7 +415,7 @@ function validateOrderForm() {
     }
     
     if (!phone || !isValidPhone(phone)) {
-        showOrderMessage('Please enter a valid 10-digit phone number.', 'error');
+        showOrderMessage('Please enter a valid phone number (e.g., +91 9876543210, 9876543210, or international format).', 'error');
         return false;
     }
     
@@ -437,9 +444,34 @@ function isValidEmail(email) {
 }
 
 function isValidPhone(phone) {
-    const phoneRegex = /^[6-9]\d{9}$/;
-    const cleanPhone = phone.replace(/\D/g, '');
-    return phoneRegex.test(cleanPhone);
+    // Remove all non-digit characters except + for country code
+    const cleanPhone = phone.replace(/[^\d+]/g, '');
+    
+    // Check for various valid phone number patterns
+    const phonePatterns = [
+        // International format with country code (e.g., +91 9876543210, +1 234 567 8900)
+        /^\+\d{1,4}\d{6,14}$/,
+        
+        // Indian mobile numbers (10 digits, starting with 6-9)
+        /^[6-9]\d{9}$/,
+        
+        // Indian landline with STD code (10-11 digits)
+        /^[0-9]{10,11}$/,
+        
+        // US/Canada format (10 digits)
+        /^\d{10}$/,
+        
+        // General international (7-15 digits, with or without country code)
+        /^(\+\d{1,4})?\d{6,14}$/
+    ];
+    
+    // Check if phone number matches any valid pattern
+    const isValid = phonePatterns.some(pattern => pattern.test(cleanPhone));
+    
+    // Additional check: must have at least 7 digits and max 19 digits (including country code)
+    const digitCount = cleanPhone.replace(/\+/g, '').length;
+    
+    return isValid && digitCount >= 7 && digitCount <= 19;
 }
 
 // Enhanced order message display
@@ -452,8 +484,34 @@ function showOrderMessage(message, type) {
     
     // Create new message element
     const messageDiv = document.createElement('div');
-    messageDiv.className = `order-message ${type === 'success' ? 'success-message' : 'error-message'}`;
-    messageDiv.innerHTML = `<strong>${type === 'success' ? '✓' : '⚠'}</strong> ${message}`;
+    messageDiv.className = `order-message ${type === 'success' ? 'success-message' : type === 'warning' ? 'warning-message' : 'error-message'}`;
+    
+    // Set appropriate icon and styling based on type
+    let icon = '⚠';
+    let bgColor = '#dc3545';
+    if (type === 'success') {
+        icon = '✓';
+        bgColor = '#28a745';
+    } else if (type === 'warning') {
+        icon = '⚠';
+        bgColor = '#ffc107';
+    }
+    
+    messageDiv.style.cssText = `
+        background: ${bgColor};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-weight: 500;
+        animation: slideInDown 0.3s ease-out;
+    `;
+    
+    messageDiv.innerHTML = `<strong style="font-size: 1.2em;">${icon}</strong> <span>${message}</span>`;
     
     // Add message after the form
     const orderFormContainer = document.querySelector('.order-form-container');
@@ -464,12 +522,18 @@ function showOrderMessage(message, type) {
         messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     
-    // Remove message after 8 seconds
+    // Remove message after appropriate time based on type
+    const removeTime = type === 'warning' ? 12000 : 8000; // Warning messages stay longer
     setTimeout(() => {
         if (messageDiv.parentNode) {
-            messageDiv.remove();
+            messageDiv.style.animation = 'slideOutUp 0.3s ease-in';
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 300);
         }
-    }, 8000);
+    }, removeTime);
 }
 
 // Enhanced file upload preview
@@ -662,9 +726,36 @@ function createFloatingButtons() {
             100% { box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4); }
         }
         
+        @keyframes slideInDown {
+            0% {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutUp {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+        }
+        
         .nav-active {
             background: rgba(44, 85, 48, 0.1) !important;
             color: var(--primary-color) !important;
+        }
+        
+        .warning-message {
+            background: #ffc107 !important;
+            color: #212529 !important;
         }
     `;
     document.head.appendChild(style);
