@@ -982,21 +982,30 @@ class ChatbotAssistant {
     init() {
         this.bindEvents();
         this.setupConversationFlow();
-        // Show notification after 3 seconds
+        // Auto-open chatbot after page loads
         setTimeout(() => {
-            this.showNotification();
-        }, 3000);
+            this.openChatbot();
+        }, 1500);
     }
 
     bindEvents() {
-        // Toggle chatbot
-        document.getElementById('chatbot-button')?.addEventListener('click', () => {
-            this.toggleChatbot();
-        });
-
         // Close chatbot
         document.getElementById('chatbot-close')?.addEventListener('click', () => {
             this.closeChatbot();
+        });
+
+        // Minimize chatbot
+        document.getElementById('chatbot-minimize')?.addEventListener('click', () => {
+            this.minimizeChatbot();
+        });
+
+        // Restore chatbot when clicking on minimized header
+        document.querySelector('.chatbot-header')?.addEventListener('click', (e) => {
+            const container = document.getElementById('chatbot-container');
+            if (container && container.classList.contains('minimized') && 
+                !e.target.closest('.chatbot-controls')) {
+                this.restoreChatbot();
+            }
         });
 
         // Send message
@@ -1214,12 +1223,27 @@ class ChatbotAssistant {
         }
     }
 
-    showNotification() {
-        const notification = document.getElementById('chatbot-notification');
-        if (notification && !this.isOpen) {
-            notification.style.display = 'flex';
+    minimizeChatbot() {
+        const container = document.getElementById('chatbot-container');
+        if (container) {
+            container.classList.add('minimized');
+            this.isOpen = false;
         }
     }
+
+    restoreChatbot() {
+        const container = document.getElementById('chatbot-container');
+        if (container) {
+            container.classList.remove('minimized');
+            this.isOpen = true;
+            // Focus on input field
+            setTimeout(() => {
+                document.getElementById('chatbot-input-field')?.focus();
+            }, 300);
+        }
+    }
+
+
 
     sendMessage() {
         const input = document.getElementById('chatbot-input-field');
