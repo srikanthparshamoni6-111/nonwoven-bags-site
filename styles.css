@@ -3649,7 +3649,7 @@ html {
     .phone-btn,
     [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 80px !important;
-        right: 85px !important; /* Phone in middle with 70px gap from WhatsApp */
+        right: 110px !important; /* Phone with much larger gap from WhatsApp */
     }
     
     .scroll-to-top {
@@ -3701,7 +3701,7 @@ html {
     .phone-btn,
     [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 80px !important;
-        right: 85px !important; /* Phone with proper spacing */
+        right: 105px !important; /* Phone with larger spacing from WhatsApp */
     }
 }
 
@@ -3740,6 +3740,6 @@ html {
     .phone-btn,
     [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 75px !important;
-        right: 80px !important; /* Phone with proper spacing */
+        right: 100px !important; /* Phone with larger spacing from WhatsApp */
     }
 }
