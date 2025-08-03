@@ -3606,7 +3606,12 @@ html {
 .phone-btn span,
 [href^="tel:"] span,
 a[href^="tel:"] span,
-.phone-btn .support-btn span {
+.phone-btn .support-btn span,
+.support-btn span,
+.quick-contact-btn span,
+.quick-contact-btn .quick-subtitle,
+a[href*="tel:"] span,
+a[href*="tel:"] .quick-subtitle {
     display: none !important;
 }
 
@@ -3626,7 +3631,7 @@ a[href^="tel:"] i {
     .quick-contact .btn-whatsapp,
     [href*="wa.me"]:not(.hero-buttons [href*="wa.me"]):not(.nav-link):not(.quick-option),
     [href*="whatsapp"]:not(.hero-buttons [href*="whatsapp"]):not(.nav-link):not(.quick-option) {
-        bottom: 220px !important; /* WhatsApp at top - much larger spacing */
+        bottom: 160px !important; /* WhatsApp at top - optimal spacing */
         right: 15px !important;
         width: 56px !important;
         height: 56px !important;
@@ -3699,7 +3704,12 @@ a[href^="tel:"] i {
     .floating-action-btn span,
     .phone-btn span,
     [href^="tel:"] span,
-    a[href^="tel:"] span {
+    a[href^="tel:"] span,
+    .support-btn span,
+    .quick-contact-btn span,
+    .quick-contact-btn .quick-subtitle,
+    a[href*="tel:"] span,
+    a[href*="tel:"] .quick-subtitle {
         display: none !important;
     }
 }
@@ -3734,7 +3744,7 @@ a[href^="tel:"] i {
     .quick-contact .btn-whatsapp,
     [href*="wa.me"]:not(.hero-buttons [href*="wa.me"]):not(.nav-link):not(.quick-option),
     [href*="whatsapp"]:not(.hero-buttons [href*="whatsapp"]):not(.nav-link):not(.quick-option) {
-        bottom: 220px !important; /* WhatsApp at top - larger spacing */
+        bottom: 160px !important; /* WhatsApp at top - optimal spacing */
         right: 15px !important;
     }
     
@@ -3746,7 +3756,12 @@ a[href^="tel:"] i {
     
     /* Hide phone number text on 480px screens */
     .phone-btn span,
-    [href^="tel:"] span {
+    [href^="tel:"] span,
+    .support-btn span,
+    .quick-contact-btn span,
+    .quick-contact-btn .quick-subtitle,
+    a[href*="tel:"] span,
+    a[href*="tel:"] .quick-subtitle {
         display: none !important;
     }
 }
@@ -3780,7 +3795,7 @@ a[href^="tel:"] i {
     .quick-contact .btn-whatsapp,
     [href*="wa.me"]:not(.hero-buttons [href*="wa.me"]):not(.nav-link):not(.quick-option),
     [href*="whatsapp"]:not(.hero-buttons [href*="whatsapp"]):not(.nav-link):not(.quick-option) {
-        bottom: 210px !important; /* WhatsApp at top - larger spacing */
+        bottom: 150px !important; /* WhatsApp at top - optimal spacing */
         right: 12px !important;
     }
     
@@ -3792,7 +3807,12 @@ a[href^="tel:"] i {
     
     /* Hide phone number text on 400px screens */
     .phone-btn span,
-    [href^="tel:"] span {
+    [href^="tel:"] span,
+    .support-btn span,
+    .quick-contact-btn span,
+    .quick-contact-btn .quick-subtitle,
+    a[href*="tel:"] span,
+    a[href*="tel:"] .quick-subtitle {
         display: none !important;
     }
 }
