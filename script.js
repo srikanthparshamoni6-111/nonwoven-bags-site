@@ -973,6 +973,9 @@ class ChatbotAssistant {
         this.userData = {};
         this.conversationFlow = {};
         this.isProcessing = false; // Prevent rapid multiple messages
+        this.orderGenerated = false; // Track if WhatsApp order was already generated
+        this.currentOrderId = null; // Track current order for modifications
+        this.isModifying = false; // Track if we're modifying an existing order
         this.init();
     }
 
@@ -1030,6 +1033,11 @@ class ChatbotAssistant {
                     this.handleQuickOption('get_quote');
                 } else if (action === 'modify_order') {
                     this.modifyCurrentOrder();
+                } else if (action === 'get_quote' && this.isModifying) {
+                    // Handle product type change during modification
+                    this.isModifying = true;
+                    this.orderGenerated = false;
+                    this.handleQuickOption(action);
                 } else {
                     this.handleQuickOption(action);
                 }
@@ -1365,6 +1373,8 @@ class ChatbotAssistant {
                 
             case 'modify_quantity':
                 if (this.userData.bagType) {
+                    this.isModifying = true;
+                    this.orderGenerated = false;
                     this.askForQuantity(this.userData.bagType);
                 } else {
                     this.addBotMessage(
@@ -1442,11 +1452,19 @@ class ChatbotAssistant {
             quantityText = this.userData.customQuantity || 'Custom quantity';
         }
         
-        this.addBotMessage(
-            "🎉 Perfect! I've prepared your order summary:",
-            null,
-            800
-        );
+        // Set or keep the current order ID
+        if (!this.currentOrderId || !this.isModifying) {
+            this.currentOrderId = Date.now().toString().slice(-6);
+        }
+        
+        let message;
+        if (this.isModifying) {
+            message = "✅ Order updated! Here's your revised summary:";
+        } else {
+            message = "🎉 Perfect! I've prepared your order summary:";
+        }
+        
+        this.addBotMessage(message, null, 800);
 
         setTimeout(() => {
             this.showOrderSummaryCard(product, quantityText, quantity);
@@ -1471,7 +1489,7 @@ class ChatbotAssistant {
                     <div class="order-info">
                         <h4>${product.name}</h4>
                         <div class="order-meta">
-                            <span class="order-id">#${Date.now().toString().slice(-6)}</span>
+                            <span class="order-id">#${this.currentOrderId}</span>
                             <span class="price-badge">${estimatedPrice}</span>
                         </div>
                     </div>
@@ -1585,11 +1603,17 @@ class ChatbotAssistant {
         const product = this.productDetails[bagType];
         this.userData.bagType = bagType;
         
-        this.addBotMessage(
-            `Great choice! ${product.name} are excellent for your needs.`,
-            null,
-            800
-        );
+        // Reset order generation state for new/modified orders
+        this.orderGenerated = false;
+        
+        let message;
+        if (this.isModifying) {
+            message = `Updated! Now selecting ${product.name}. Let's update your quantity.`;
+        } else {
+            message = `Great choice! ${product.name} are excellent for your needs.`;
+        }
+        
+        this.addBotMessage(message, null, 800);
 
         setTimeout(() => {
             this.askForQuantity(bagType);
@@ -1599,8 +1623,15 @@ class ChatbotAssistant {
     askForQuantity(bagType) {
         const product = this.productDetails[bagType];
         
+        let message;
+        if (this.isModifying) {
+            message = `What's the new quantity for ${product.name}?`;
+        } else {
+            message = `How many ${product.name} do you need? This helps us provide accurate pricing:`;
+        }
+        
         this.addBotMessage(
-            `How many ${product.name} do you need? This helps us provide accurate pricing:`,
+            message,
             [
                 { text: "100 - 500 pcs", value: "100-500" },
                 { text: "500 - 1,000 pcs", value: "500-1000" },
@@ -1616,6 +1647,20 @@ class ChatbotAssistant {
     }
 
     generateWhatsAppOrder(bagType) {
+        // Prevent multiple WhatsApp order generations
+        if (this.orderGenerated) {
+            this.addBotMessage(
+                "⚠️ Order already generated! You can modify your order above or contact sales directly.",
+                [
+                    { text: "Modify Order", value: "modify_order" },
+                    { text: "Contact Sales", value: "contact_sales" },
+                    { text: "New Quote", value: "new_quote" }
+                ],
+                600
+            );
+            return;
+        }
+        
         const product = this.productDetails[bagType];
         let quantityText = this.userData.quantity || 'To be discussed';
         
@@ -1630,8 +1675,12 @@ class ChatbotAssistant {
         
         const estimatedPrice = this.getEstimatedPrice(this.userData.quantity);
         
+        // Add modification status to order details
+        const orderType = this.isModifying ? 'MODIFIED ORDER' : 'NEW ORDER';
         const orderDetails = `
 Hi Srivenkateshwara NON Woven Bags,
+
+${orderType} - Order #${this.currentOrderId}
 
 I'm interested in placing an order through your website chatbot:
 
@@ -1661,11 +1710,14 @@ Thank you for your quick response!
             </button>
         `;
 
-        this.addBotMessage(
-            "🎉 Your order details are ready! Click the button below to send this directly to our WhatsApp for immediate processing:",
-            null,
-            500
-        );
+        let message;
+        if (this.isModifying) {
+            message = "✅ Modified order details ready! Click below to send your updated requirements:";
+        } else {
+            message = "🎉 Your order details are ready! Click the button below to send this directly to our WhatsApp:";
+        }
+
+        this.addBotMessage(message, null, 500);
 
         setTimeout(() => {
             const messagesContainer = document.getElementById('chatbot-messages');
@@ -1692,6 +1744,10 @@ Thank you for your quick response!
                 messagesContainer.appendChild(whatsappElement);
                 this.scrollToBottom();
             }
+            
+            // Mark order as generated and reset modification state
+            this.orderGenerated = true;
+            this.isModifying = false;
         }, 1000);
     }
 
@@ -1812,6 +1868,9 @@ Thank you for your quick response!
         this.userData = {};
         this.currentStep = 'initial';
         this.isProcessing = false;
+        this.orderGenerated = false;
+        this.currentOrderId = null;
+        this.isModifying = false;
         
         this.addBotMessage(
             "🔄 Starting fresh! What would you like to know about our non-woven bags?",
@@ -1827,8 +1886,12 @@ Thank you for your quick response!
     modifyCurrentOrder() {
         const product = this.productDetails[this.userData.bagType];
         
+        // Set modification state
+        this.isModifying = true;
+        this.orderGenerated = false; // Allow regeneration for modifications
+        
         this.addBotMessage(
-            `Current selection: ${product?.name || 'No product selected'}
+            `Current order: ${product?.name || 'No product selected'}
             
 What would you like to modify?`,
             [
