@@ -1386,7 +1386,7 @@ class ChatbotAssistant {
                 
             case 'confirm_order':
                 if (this.userData.bagType && this.userData.quantity) {
-                    this.generateWhatsAppOrder(this.userData.bagType);
+                    this.directWhatsAppOrder(this.userData.bagType);
                 } else {
                     this.addBotMessage(
                         "Sorry, there seems to be missing information. Let's start over:",
@@ -1508,7 +1508,7 @@ class ChatbotAssistant {
                 
                 <div class="order-actions">
                     <button class="quick-option primary-action" data-action="confirm_order">
-                        <i class="fab fa-whatsapp"></i> Send Order
+                        <i class="fab fa-whatsapp"></i> Send to WhatsApp
                     </button>
                     <button class="quick-option secondary-action" data-action="modify_order">
                         <i class="fas fa-edit"></i> Edit
@@ -1644,6 +1644,102 @@ class ChatbotAssistant {
         );
         
         this.currentStep = 'quantity_selection';
+    }
+
+    directWhatsAppOrder(bagType) {
+        // Prevent multiple WhatsApp order generations
+        if (this.orderGenerated) {
+            this.addBotMessage(
+                "⚠️ Order already sent to WhatsApp! You can modify your order or contact sales directly.",
+                [
+                    { text: "Modify Order", value: "modify_order" },
+                    { text: "Contact Sales", value: "contact_sales" },
+                    { text: "New Quote", value: "new_quote" }
+                ],
+                600
+            );
+            return;
+        }
+        
+        const product = this.productDetails[bagType];
+        let quantityText = this.userData.quantity || 'To be discussed';
+        
+        // Format quantity for display
+        if (this.userData.quantity === 'custom-quantity' && this.userData.customQuantity) {
+            quantityText = this.userData.customQuantity;
+        } else if (this.userData.quantity && this.userData.quantity !== 'unsure') {
+            quantityText = `${this.userData.quantity} pieces`;
+        } else if (this.userData.quantity === 'unsure') {
+            quantityText = 'Quantity to be discussed';
+        }
+        
+        const estimatedPrice = this.getEstimatedPrice(this.userData.quantity);
+        
+        // Add modification status to order details
+        const orderType = this.isModifying ? 'MODIFIED ORDER' : 'NEW ORDER';
+        const orderDetails = `
+Hi Srivenkateshwara NON Woven Bags,
+
+${orderType} - Order #${this.currentOrderId}
+
+I'm interested in placing an order through your website chatbot:
+
+📦 Product Type: ${product.name}
+📊 Quantity Needed: ${quantityText}
+💰 Expected Price Range: ${estimatedPrice}
+📋 Product Features: ${product.features.join(', ')}
+
+Please provide me with:
+✅ Detailed quote with exact pricing
+✅ Delivery timeline and shipping cost
+✅ Customization options (logo printing, colors)
+✅ Payment terms and methods
+✅ Sample availability
+
+Additional Requirements: [Please specify any special requirements]
+
+Thank you for your quick response!
+        `.trim();
+
+        const whatsappUrl = `https://wa.me/916302067390?text=${encodeURIComponent(orderDetails)}`;
+        
+        // Directly open WhatsApp
+        try {
+            window.open(whatsappUrl, '_blank');
+            
+            // Show success message
+            let successMessage;
+            if (this.isModifying) {
+                successMessage = "✅ Modified order sent to WhatsApp! Our team will respond with updated pricing soon.";
+            } else {
+                successMessage = "🎉 Order sent to WhatsApp successfully! Our team typically responds within 2 hours.";
+            }
+            
+            this.addBotMessage(
+                successMessage,
+                [
+                    { text: "New Quote", value: "new_quote" },
+                    { text: "Contact Sales", value: "contact_sales" },
+                    { text: "Modify This Order", value: "modify_order" }
+                ],
+                800
+            );
+            
+            // Mark order as generated and reset modification state
+            this.orderGenerated = true;
+            this.isModifying = false;
+            
+        } catch (error) {
+            console.error('Error opening WhatsApp:', error);
+            this.addBotMessage(
+                "❌ Unable to open WhatsApp automatically. You can copy this number and contact us directly: +91 6302067390",
+                [
+                    { text: "Try Again", value: "confirm_order" },
+                    { text: "Contact Sales", value: "contact_sales" }
+                ],
+                600
+            );
+        }
     }
 
     generateWhatsAppOrder(bagType) {
