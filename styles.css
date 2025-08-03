@@ -3649,12 +3649,17 @@ html {
     .phone-btn,
     [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 80px !important;
-        right: 110px !important; /* Phone with much larger gap from WhatsApp */
+        right: 150px !important; /* Phone with massive gap from WhatsApp to prevent overlap */
     }
     
     .scroll-to-top {
         bottom: 15px !important;
         right: 15px !important; /* Arrow at bottom */
+    }
+    
+    /* Force phone icon spacing to prevent any overlap */
+    .phone-btn {
+        right: 150px !important;
     }
     
     /* Ensure icons don't have text overflow */
@@ -3701,7 +3706,12 @@ html {
     .phone-btn,
     [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 80px !important;
-        right: 105px !important; /* Phone with larger spacing from WhatsApp */
+        right: 140px !important; /* Phone with massive spacing from WhatsApp to prevent overlap */
+    }
+    
+    /* Force phone icon spacing on 480px screens */
+    .phone-btn {
+        right: 140px !important;
     }
 }
 
@@ -3740,6 +3750,11 @@ html {
     .phone-btn,
     [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 75px !important;
-        right: 100px !important; /* Phone with larger spacing from WhatsApp */
+        right: 130px !important; /* Phone with massive spacing from WhatsApp to prevent overlap */
+    }
+    
+    /* Force phone icon spacing on 400px screens */
+    .phone-btn {
+        right: 130px !important;
     }
 }
