@@ -990,10 +990,16 @@ class ChatbotAssistant {
     }
 
     bindEvents() {
-        // Toggle chatbot
-        document.getElementById('chatbot-button')?.addEventListener('click', () => {
-            this.toggleChatbot();
-        });
+        // Toggle chatbot - ensure this always works
+        const chatButton = document.getElementById('chatbot-button');
+        if (chatButton) {
+            chatButton.addEventListener('click', (e) => {
+                // Only toggle if not currently dragging
+                if (!e.target.closest('#chatbot-widget').classList.contains('dragging')) {
+                    this.toggleChatbot();
+                }
+            });
+        }
 
         // Close chatbot
         document.getElementById('chatbot-close')?.addEventListener('click', () => {
@@ -2013,64 +2019,87 @@ What would you like to modify?`,
         
         if (!widget || !button) return;
         
+        // Check if device supports touch
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
         let isDragging = false;
         let startX, startY, initialX, initialY;
         
-        // Touch events for mobile
-        button.addEventListener('touchstart', (e) => {
-            if (this.isOpen) return; // Don't drag when chat is open
+        // Touch events for mobile (only if touch device)
+        if (isTouchDevice) {
+            let touchStartTime = 0;
+            let dragThreshold = 15; // pixels to move before considering it a drag
+            let timeThreshold = 300; // ms to hold before drag starts (increased for reliability)
             
-            isDragging = true;
-            widget.classList.add('dragging', 'draggable');
+            button.addEventListener('touchstart', (e) => {
+                if (this.isOpen) return; // Don't drag when chat is open
+                
+                touchStartTime = Date.now();
+                const touch = e.touches[0];
+                startX = touch.clientX;
+                startY = touch.clientY;
+                
+                const rect = widget.getBoundingClientRect();
+                initialX = rect.left;
+                initialY = rect.top;
+                
+                // Don't prevent default immediately - let tap work normally
+            }, { passive: true });
             
-            const touch = e.touches[0];
-            startX = touch.clientX;
-            startY = touch.clientY;
+            button.addEventListener('touchmove', (e) => {
+                const touch = e.touches[0];
+                const deltaX = Math.abs(touch.clientX - startX);
+                const deltaY = Math.abs(touch.clientY - startY);
+                const totalDelta = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                const timeDelta = Date.now() - touchStartTime;
+                
+                // Only start dragging if moved enough AND held long enough
+                if (!isDragging && totalDelta > dragThreshold && timeDelta > timeThreshold) {
+                    isDragging = true;
+                    widget.classList.add('dragging', 'draggable');
+                    e.preventDefault();
+                }
+                
+                if (!isDragging) return;
+                
+                e.preventDefault();
+                
+                const newX = initialX + (touch.clientX - startX);
+                const newY = initialY + (touch.clientY - startY);
+                
+                // Keep within viewport bounds
+                const maxX = window.innerWidth - widget.offsetWidth;
+                const maxY = window.innerHeight - widget.offsetHeight;
+                
+                const boundedX = Math.max(0, Math.min(newX, maxX));
+                const boundedY = Math.max(0, Math.min(newY, maxY));
+                
+                widget.style.position = 'fixed';
+                widget.style.left = boundedX + 'px';
+                widget.style.top = boundedY + 'px';
+                widget.style.bottom = 'auto';
+                widget.style.right = 'auto';
+            }, { passive: false });
             
-            const rect = widget.getBoundingClientRect();
-            initialX = rect.left;
-            initialY = rect.top;
-            
-            e.preventDefault();
-        }, { passive: false });
-        
-        button.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            
-            e.preventDefault();
-            
-            const touch = e.touches[0];
-            const deltaX = touch.clientX - startX;
-            const deltaY = touch.clientY - startY;
-            
-            const newX = initialX + deltaX;
-            const newY = initialY + deltaY;
-            
-            // Keep within viewport bounds
-            const maxX = window.innerWidth - widget.offsetWidth;
-            const maxY = window.innerHeight - widget.offsetHeight;
-            
-            const boundedX = Math.max(0, Math.min(newX, maxX));
-            const boundedY = Math.max(0, Math.min(newY, maxY));
-            
-            widget.style.position = 'fixed';
-            widget.style.left = boundedX + 'px';
-            widget.style.top = boundedY + 'px';
-            widget.style.bottom = 'auto';
-            widget.style.right = 'auto';
-        }, { passive: false });
-        
-        button.addEventListener('touchend', (e) => {
-            if (!isDragging) return;
-            
-            isDragging = false;
-            widget.classList.remove('dragging');
-            
-            // Snap to edges for better UX
-            this.snapToEdge(widget);
-            
-            e.preventDefault();
-        }, { passive: false });
+            button.addEventListener('touchend', (e) => {
+                const timeDelta = Date.now() - touchStartTime;
+                
+                if (isDragging) {
+                    // End dragging
+                    isDragging = false;
+                    widget.classList.remove('dragging');
+                    
+                    // Snap to edges for better UX
+                    this.snapToEdge(widget);
+                    
+                    e.preventDefault();
+                } else if (timeDelta < timeThreshold) {
+                    // Quick tap - let it work normally to open chatbot
+                    // Don't prevent default to allow normal click behavior
+                    return;
+                }
+            }, { passive: false });
+        }
         
         // Mouse events for desktop
         button.addEventListener('mousedown', (e) => {
@@ -2153,8 +2182,27 @@ What would you like to modify?`,
     initDraggable() {
         // Wait for DOM to be ready
         setTimeout(() => {
-            this.makeDraggable();
+            try {
+                this.makeDraggable();
+            } catch (error) {
+                console.log('Draggable functionality not available, chatbot will work normally');
+                // Ensure basic chatbot functionality still works
+                this.ensureBasicFunctionality();
+            }
         }, 500);
+    }
+    
+    // Ensure basic chatbot functionality works
+    ensureBasicFunctionality() {
+        const button = document.getElementById('chatbot-button');
+        if (button) {
+            // Remove any problematic event listeners and add basic click
+            button.addEventListener('click', (e) => {
+                if (!this.isOpen) {
+                    this.toggleChatbot();
+                }
+            });
+        }
     }
 }
 
