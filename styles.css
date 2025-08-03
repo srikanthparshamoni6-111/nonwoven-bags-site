@@ -3600,26 +3600,38 @@ html {
     }
 }
 
-/* Mobile-specific extreme spacing for phone icon */
+/* Mobile-specific optimal spacing for phone icon */
 @media (max-width: 768px) {
-    /* Ultimate phone icon positioning for mobile - prevent all overlap */
+    /* Optimal phone icon positioning for mobile - stay in sidebar but no overlap */
     .phone-btn,
     [href^="tel:"],
     a[href^="tel:"] {
-        right: 220px !important;
+        right: 90px !important;
         bottom: 80px !important;
         position: fixed !important;
         z-index: 9998 !important;
     }
 }
 
-/* Extra small mobile screens - even more spacing */
+/* Extra small mobile screens - adjust for smaller screens */
 @media (max-width: 600px) {
     .phone-btn,
     [href^="tel:"],
     a[href^="tel:"] {
-        right: 200px !important;
+        right: 85px !important;
         bottom: 80px !important;
+        position: fixed !important;
+        z-index: 9998 !important;
+    }
+}
+
+/* Very small screens - ensure phone stays in sidebar */
+@media (max-width: 400px) {
+    .phone-btn,
+    [href^="tel:"],
+    a[href^="tel:"] {
+        right: 80px !important;
+        bottom: 75px !important;
         position: fixed !important;
         z-index: 9998 !important;
     }
@@ -3674,20 +3686,12 @@ html {
     .phone-btn,
     [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 80px !important;
-        right: 200px !important; /* Phone with extreme gap from WhatsApp for mobile */
+        right: 90px !important; /* Phone with optimal gap from WhatsApp for mobile */
     }
     
     .scroll-to-top {
         bottom: 15px !important;
         right: 15px !important; /* Arrow at bottom */
-    }
-    
-    /* Force phone icon spacing to prevent any overlap on mobile */
-    .phone-btn,
-    [href^="tel:"] {
-        right: 200px !important;
-        bottom: 80px !important;
-        position: fixed !important;
     }
     
     /* Ensure icons don't have text overflow */
@@ -3734,15 +3738,7 @@ html {
     .phone-btn,
     [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 80px !important;
-        right: 180px !important; /* Phone with extreme spacing from WhatsApp for 480px mobile */
-    }
-    
-    /* Force phone icon spacing on 480px screens */
-    .phone-btn,
-    [href^="tel:"] {
-        right: 180px !important;
-        bottom: 80px !important;
-        position: fixed !important;
+        right: 85px !important; /* Phone with optimal spacing from WhatsApp for 480px mobile */
     }
 }
 
@@ -3781,14 +3777,6 @@ html {
     .phone-btn,
     [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 75px !important;
-        right: 160px !important; /* Phone with extreme spacing from WhatsApp for 400px mobile */
-    }
-    
-    /* Force phone icon spacing on 400px screens */
-    .phone-btn,
-    [href^="tel:"] {
-        right: 160px !important;
-        bottom: 75px !important;
-        position: fixed !important;
+        right: 80px !important; /* Phone with optimal spacing from WhatsApp for 400px mobile */
     }
 }
