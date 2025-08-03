@@ -1008,6 +1008,14 @@ class ChatbotAssistant {
             }
         });
 
+        // Floating icon click to restore chatbot
+        document.getElementById('chatbot-floating-icon')?.addEventListener('click', () => {
+            this.restoreChatbot();
+        });
+
+        // Make floating icon draggable
+        this.makeDraggable();
+
         // Send message
         document.getElementById('chatbot-send')?.addEventListener('click', () => {
             this.sendMessage();
@@ -1217,33 +1225,128 @@ class ChatbotAssistant {
 
     closeChatbot() {
         const container = document.getElementById('chatbot-container');
+        const floatingIcon = document.getElementById('chatbot-floating-icon');
         if (container) {
             container.classList.remove('active');
+            container.classList.remove('chatbot-auto-open');
+            container.style.display = 'none';
             this.isOpen = false;
+        }
+        if (floatingIcon) {
+            floatingIcon.style.display = 'flex';
         }
     }
 
     minimizeChatbot() {
         const container = document.getElementById('chatbot-container');
+        const floatingIcon = document.getElementById('chatbot-floating-icon');
         if (container) {
             container.classList.add('minimized');
+            container.style.display = 'none';
             this.isOpen = false;
+        }
+        if (floatingIcon) {
+            floatingIcon.style.display = 'flex';
         }
     }
 
     restoreChatbot() {
         const container = document.getElementById('chatbot-container');
+        const floatingIcon = document.getElementById('chatbot-floating-icon');
         if (container) {
             container.classList.remove('minimized');
+            container.style.display = 'flex';
             this.isOpen = true;
             // Focus on input field
             setTimeout(() => {
                 document.getElementById('chatbot-input-field')?.focus();
             }, 300);
         }
+        if (floatingIcon) {
+            floatingIcon.style.display = 'none';
+        }
     }
 
+    makeDraggable() {
+        const floatingIcon = document.getElementById('chatbot-floating-icon');
+        if (!floatingIcon) return;
 
+        let isDragging = false;
+        let currentX = 0;
+        let currentY = 0;
+        let initialX = 0;
+        let initialY = 0;
+        let xOffset = 0;
+        let yOffset = 0;
+
+        floatingIcon.addEventListener('mousedown', dragStart);
+        floatingIcon.addEventListener('touchstart', dragStart);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('mouseup', dragEnd);
+        document.addEventListener('touchend', dragEnd);
+
+        function dragStart(e) {
+            if (e.type === 'touchstart') {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            } else {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            }
+
+            if (e.target === floatingIcon || e.target.parentNode === floatingIcon) {
+                isDragging = true;
+                floatingIcon.classList.add('dragging');
+            }
+        }
+
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                
+                if (e.type === 'touchmove') {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
+                } else {
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                }
+
+                xOffset = currentX;
+                yOffset = currentY;
+
+                // Constrain to viewport
+                const rect = floatingIcon.getBoundingClientRect();
+                const maxX = window.innerWidth - rect.width;
+                const maxY = window.innerHeight - rect.height;
+
+                xOffset = Math.max(0, Math.min(xOffset, maxX));
+                yOffset = Math.max(0, Math.min(yOffset, maxY));
+
+                floatingIcon.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+            }
+        }
+
+        function dragEnd(e) {
+            if (isDragging) {
+                isDragging = false;
+                floatingIcon.classList.remove('dragging');
+                
+                // Snap to edges if close
+                const rect = floatingIcon.getBoundingClientRect();
+                const snapDistance = 50;
+                
+                if (rect.left < snapDistance) {
+                    xOffset = -rect.left + 20;
+                    floatingIcon.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+                } else if (rect.right > window.innerWidth - snapDistance) {
+                    xOffset = window.innerWidth - rect.width - 20;
+                    floatingIcon.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+                }
+            }
+        }
+    }
 
     sendMessage() {
         const input = document.getElementById('chatbot-input-field');
