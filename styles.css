@@ -2725,7 +2725,7 @@ html {
 /* Mobile adjustments for chatbot */
 @media (max-width: 768px) {
     #chatbot-widget {
-        bottom: 280px; /* Position much higher above WhatsApp with ample spacing */
+        bottom: 180px; /* Position above WhatsApp but not too high */
         right: 15px;
         z-index: 10000; /* Higher z-index for mobile */
     }
@@ -3167,7 +3167,7 @@ html {
 
 @media (max-width: 480px) {
     #chatbot-widget {
-        bottom: 270px; /* Position much higher above WhatsApp with ample spacing */
+        bottom: 170px; /* Position above WhatsApp but not too high */
         right: 15px;
     }
     
@@ -3555,7 +3555,7 @@ html {
 /* Very small screens (below 400px) */
 @media (max-width: 400px) {
     #chatbot-widget {
-        bottom: 260px; /* Position much higher above other icons with ample spacing */
+        bottom: 160px; /* Position above other icons but not too high */
         right: 12px;
     }
     
