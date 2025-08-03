@@ -2726,7 +2726,7 @@ html {
 .chatbot-floating-icon {
     position: fixed;
     bottom: 150px;
-    right: 20px;
+    left: 20px; /* Position on left side */
     width: 60px;
     height: 60px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -2769,7 +2769,7 @@ html {
         width: 56px;
         height: 56px;
         bottom: 140px;
-        right: 15px;
+        left: 15px; /* Left side on mobile */
     }
     
     .chatbot-floating-icon i {
@@ -3205,7 +3205,7 @@ html {
         width: 52px;
         height: 52px;
         bottom: 130px;
-        right: 15px;
+        left: 15px; /* Left side on smaller screens */
     }
     
     .chatbot-floating-icon i {
@@ -3602,12 +3602,13 @@ html {
 
 /* Standardize all floating icons */
 @media (max-width: 768px) {
-    /* WhatsApp and other floating buttons consistency - exclude hero buttons */
-    .social-link,
+    /* Floating buttons only - completely exclude hero section buttons */
+    .social-link:not(.hero-buttons .social-link),
     .footer .btn-whatsapp,
     .contact .btn-whatsapp,
-    [href*="wa.me"]:not(.hero-buttons *),
-    [href*="whatsapp"]:not(.hero-buttons *),
+    .quick-contact .btn-whatsapp,
+    [href*="wa.me"]:not(.hero-buttons [href*="wa.me"]):not(.nav-link):not(.quick-option),
+    [href*="whatsapp"]:not(.hero-buttons [href*="whatsapp"]):not(.nav-link):not(.quick-option),
     .floating-action-btn,
     .scroll-to-top,
     .phone-btn {
@@ -3623,25 +3624,37 @@ html {
         z-index: 9998 !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
     }
+
+    /* Ensure hero buttons maintain their rectangular shape */
+    .hero-buttons .btn {
+        width: auto !important;
+        height: auto !important;
+        border-radius: 50px !important;
+        position: relative !important;
+        display: inline-flex !important;
+        padding: 12px 16px !important;
+        font-size: 1rem !important;
+    }
     
-    /* Specific positioning for common floating icons - exclude hero buttons */
+    /* Specific positioning for floating icons - proper order: WhatsApp, Phone, Arrow */
     .footer .btn-whatsapp,
     .contact .btn-whatsapp,
-    [href*="wa.me"]:not(.nav-link):not(.quick-option):not(.hero-buttons *),
-    [href*="whatsapp"]:not(.nav-link):not(.quick-option):not(.hero-buttons *) {
+    .quick-contact .btn-whatsapp,
+    [href*="wa.me"]:not(.hero-buttons [href*="wa.me"]):not(.nav-link):not(.quick-option),
+    [href*="whatsapp"]:not(.hero-buttons [href*="whatsapp"]):not(.nav-link):not(.quick-option) {
         bottom: 80px !important;
-        right: 15px !important;
+        right: 15px !important; /* WhatsApp closest to edge */
     }
     
     .phone-btn,
-    [href^="tel:"] {
+    [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 80px !important;
-        right: 105px !important; /* Even more space from WhatsApp */
+        right: 85px !important; /* Phone in middle with 70px gap from WhatsApp */
     }
     
     .scroll-to-top {
         bottom: 15px !important;
-        right: 15px !important;
+        right: 15px !important; /* Arrow at bottom */
     }
     
     /* Ensure icons don't have text overflow */
@@ -3653,11 +3666,12 @@ html {
 }
 
 @media (max-width: 480px) {
-    .social-link,
+    .social-link:not(.hero-buttons .social-link),
     .footer .btn-whatsapp,
     .contact .btn-whatsapp,
-    [href*="wa.me"]:not(.hero-buttons *),
-    [href*="whatsapp"]:not(.hero-buttons *),
+    .quick-contact .btn-whatsapp,
+    [href*="wa.me"]:not(.hero-buttons [href*="wa.me"]):not(.nav-link):not(.quick-option),
+    [href*="whatsapp"]:not(.hero-buttons [href*="whatsapp"]):not(.nav-link):not(.quick-option),
     .floating-action-btn,
     .scroll-to-top,
     .phone-btn {
@@ -3665,18 +3679,29 @@ html {
         height: 56px !important;
     }
     
+    /* Ensure hero buttons maintain proper styling on smaller screens */
+    .hero-buttons .btn {
+        width: auto !important;
+        height: auto !important;
+        border-radius: 50px !important;
+        position: relative !important;
+        padding: 10px 14px !important;
+        font-size: 0.9rem !important;
+    }
+    
     .footer .btn-whatsapp,
     .contact .btn-whatsapp,
-    [href*="wa.me"]:not(.nav-link):not(.quick-option):not(.hero-buttons *),
-    [href*="whatsapp"]:not(.nav-link):not(.quick-option):not(.hero-buttons *) {
+    .quick-contact .btn-whatsapp,
+    [href*="wa.me"]:not(.hero-buttons [href*="wa.me"]):not(.nav-link):not(.quick-option),
+    [href*="whatsapp"]:not(.hero-buttons [href*="whatsapp"]):not(.nav-link):not(.quick-option) {
         bottom: 80px !important;
-        right: 15px !important;
+        right: 15px !important; /* WhatsApp closest to edge */
     }
     
     .phone-btn,
-    [href^="tel:"] {
+    [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 80px !important;
-        right: 100px !important; /* Even more space from WhatsApp */
+        right: 85px !important; /* Phone with proper spacing */
     }
 }
 
@@ -3693,17 +3718,28 @@ html {
         font-size: 18px !important;
     }
     
+    /* Ensure hero buttons maintain proper styling on very small screens */
+    .hero-buttons .btn {
+        width: auto !important;
+        height: auto !important;
+        border-radius: 50px !important;
+        position: relative !important;
+        padding: 8px 12px !important;
+        font-size: 0.85rem !important;
+    }
+    
     .footer .btn-whatsapp,
     .contact .btn-whatsapp,
-    [href*="wa.me"]:not(.nav-link):not(.quick-option):not(.hero-buttons *),
-    [href*="whatsapp"]:not(.nav-link):not(.quick-option):not(.hero-buttons *) {
+    .quick-contact .btn-whatsapp,
+    [href*="wa.me"]:not(.hero-buttons [href*="wa.me"]):not(.nav-link):not(.quick-option),
+    [href*="whatsapp"]:not(.hero-buttons [href*="whatsapp"]):not(.nav-link):not(.quick-option) {
         bottom: 75px !important;
-        right: 12px !important;
+        right: 12px !important; /* WhatsApp closest to edge */
     }
     
     .phone-btn,
-    [href^="tel:"] {
+    [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 75px !important;
-        right: 95px !important; /* Even more space from WhatsApp */
+        right: 80px !important; /* Phone with proper spacing */
     }
 }
