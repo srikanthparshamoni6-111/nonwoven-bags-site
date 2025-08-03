@@ -995,30 +995,52 @@ class ChatbotAssistant {
     }
 
     bindEvents() {
-        // Toggle chatbot
-        document.getElementById('chatbot-button')?.addEventListener('click', () => {
-            this.toggleChatbot();
-        });
+        // Toggle chatbot - Enhanced for mobile
+        const chatbotButton = document.getElementById('chatbot-button');
+        if (chatbotButton) {
+            this.addMobileCompatibleEventListener(chatbotButton, 'click', (e) => {
+                this.toggleChatbot();
+            });
+        }
 
-        // Close chatbot
-        document.getElementById('chatbot-close')?.addEventListener('click', () => {
-            this.closeChatbot();
-        });
+        // Close chatbot - Enhanced for mobile
+        const closeButton = document.getElementById('chatbot-close');
+        if (closeButton) {
+            this.addMobileCompatibleEventListener(closeButton, 'click', (e) => {
+                this.closeChatbot();
+            });
+        }
 
-        // Send message
-        document.getElementById('chatbot-send')?.addEventListener('click', () => {
-            this.sendMessage();
-        });
-
-        // Enter key to send
-        document.getElementById('chatbot-input-field')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+        // Send message - Enhanced for mobile
+        const sendButton = document.getElementById('chatbot-send');
+        if (sendButton) {
+            this.addMobileCompatibleEventListener(sendButton, 'click', (e) => {
                 this.sendMessage();
-            }
-        });
+            });
+        }
 
-        // Quick options and other chat buttons
-        document.addEventListener('click', (e) => {
+        // Enter key to send - Enhanced for mobile
+        const inputField = document.getElementById('chatbot-input-field');
+        if (inputField) {
+            inputField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.sendMessage();
+                }
+            });
+            
+            // For mobile devices, also handle input events
+            if (this.isTouchDevice()) {
+                inputField.addEventListener('input', (e) => {
+                    // Auto-resize text area behavior for mobile
+                    e.target.style.height = 'auto';
+                    e.target.style.height = e.target.scrollHeight + 'px';
+                });
+            }
+        }
+
+        // Quick options and other chat buttons - Enhanced for mobile
+        this.addMobileCompatibleEventListener(document, 'click', (e) => {
             if (e.target.classList.contains('quick-option')) {
                 if (this.isProcessing) return; // Prevent rapid clicks
                 
@@ -2333,16 +2355,6 @@ What would you like to modify?`,
 
     // Mobile-specific initialization
     initMobileOptimizations() {
-        // Prevent zoom on double tap for chatbot button
-        const button = document.getElementById('chatbot-button');
-        if (button) {
-            button.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.toggleChat();
-            }, { passive: false });
-        }
-
         // Ensure touch events work properly on mobile
         document.addEventListener('touchstart', () => {}, { passive: true });
         
@@ -2355,6 +2367,43 @@ What would you like to modify?`,
         setViewportHeight();
         window.addEventListener('resize', setViewportHeight);
         window.addEventListener('orientationchange', setViewportHeight);
+
+        // Prevent zoom on form inputs on iOS
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            const inputField = document.getElementById('chatbot-input-field');
+            if (inputField) {
+                inputField.addEventListener('focus', () => {
+                    inputField.style.fontSize = '16px'; // Prevents zoom on iOS
+                });
+                inputField.addEventListener('blur', () => {
+                    inputField.style.fontSize = '14px'; // Reset font size
+                });
+            }
+        }
+    }
+
+    // Helper method to detect touch devices
+    isTouchDevice() {
+        return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+    }
+
+    // Enhanced event listener that works on both desktop and mobile
+    addMobileCompatibleEventListener(element, eventType, handler) {
+        if (this.isTouchDevice()) {
+            // For touch devices, use both touchend and click as fallback
+            element.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handler(e);
+            }, { passive: false });
+            
+            element.addEventListener('click', (e) => {
+                e.preventDefault();
+                handler(e);
+            });
+        } else {
+            // For desktop, use standard click
+            element.addEventListener(eventType, handler);
+        }
     }
 }
 
