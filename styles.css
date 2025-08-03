@@ -3610,8 +3610,15 @@ a[href^="tel:"] span,
 .support-btn span,
 .quick-contact-btn span,
 .quick-contact-btn .quick-subtitle,
+.quick-contact-btn .quick-title,
+.quick-contact-btn div,
 a[href*="tel:"] span,
-a[href*="tel:"] .quick-subtitle {
+a[href*="tel:"] .quick-subtitle,
+a[href*="tel:"] .quick-title,
+a[href*="tel:"] div,
+a[class*="support-btn"] span,
+a[class*="quick-contact-btn"] span,
+a[class*="quick-contact-btn"] div {
     display: none !important;
 }
 
@@ -3708,8 +3715,15 @@ a[href^="tel:"] i {
     .support-btn span,
     .quick-contact-btn span,
     .quick-contact-btn .quick-subtitle,
+    .quick-contact-btn .quick-title,
+    .quick-contact-btn div,
     a[href*="tel:"] span,
-    a[href*="tel:"] .quick-subtitle {
+    a[href*="tel:"] .quick-subtitle,
+    a[href*="tel:"] .quick-title,
+    a[href*="tel:"] div,
+    a[class*="support-btn"] span,
+    a[class*="quick-contact-btn"] span,
+    a[class*="quick-contact-btn"] div {
         display: none !important;
     }
 }
@@ -3760,8 +3774,15 @@ a[href^="tel:"] i {
     .support-btn span,
     .quick-contact-btn span,
     .quick-contact-btn .quick-subtitle,
+    .quick-contact-btn .quick-title,
+    .quick-contact-btn div,
     a[href*="tel:"] span,
-    a[href*="tel:"] .quick-subtitle {
+    a[href*="tel:"] .quick-subtitle,
+    a[href*="tel:"] .quick-title,
+    a[href*="tel:"] div,
+    a[class*="support-btn"] span,
+    a[class*="quick-contact-btn"] span,
+    a[class*="quick-contact-btn"] div {
         display: none !important;
     }
 }
@@ -3811,8 +3832,15 @@ a[href^="tel:"] i {
     .support-btn span,
     .quick-contact-btn span,
     .quick-contact-btn .quick-subtitle,
+    .quick-contact-btn .quick-title,
+    .quick-contact-btn div,
     a[href*="tel:"] span,
-    a[href*="tel:"] .quick-subtitle {
+    a[href*="tel:"] .quick-subtitle,
+    a[href*="tel:"] .quick-title,
+    a[href*="tel:"] div,
+    a[class*="support-btn"] span,
+    a[class*="quick-contact-btn"] span,
+    a[class*="quick-contact-btn"] div {
         display: none !important;
     }
 }
