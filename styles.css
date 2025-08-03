@@ -3602,11 +3602,12 @@ html {
 
 /* Standardize all floating icons */
 @media (max-width: 768px) {
-    /* WhatsApp and other floating buttons consistency */
+    /* WhatsApp and other floating buttons consistency - exclude hero buttons */
     .social-link,
-    .btn-whatsapp,
-    [href*="wa.me"],
-    [href*="whatsapp"],
+    .footer .btn-whatsapp,
+    .contact .btn-whatsapp,
+    [href*="wa.me"]:not(.hero-buttons *),
+    [href*="whatsapp"]:not(.hero-buttons *),
     .floating-action-btn,
     .scroll-to-top,
     .phone-btn {
@@ -3623,10 +3624,11 @@ html {
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
     }
     
-    /* Specific positioning for common floating icons */
-    .btn-whatsapp,
-    [href*="wa.me"]:not(.nav-link):not(.quick-option),
-    [href*="whatsapp"]:not(.nav-link):not(.quick-option) {
+    /* Specific positioning for common floating icons - exclude hero buttons */
+    .footer .btn-whatsapp,
+    .contact .btn-whatsapp,
+    [href*="wa.me"]:not(.nav-link):not(.quick-option):not(.hero-buttons *),
+    [href*="whatsapp"]:not(.nav-link):not(.quick-option):not(.hero-buttons *) {
         bottom: 80px !important;
         right: 15px !important;
     }
@@ -3634,7 +3636,7 @@ html {
     .phone-btn,
     [href^="tel:"] {
         bottom: 80px !important;
-        right: 95px !important; /* More space from WhatsApp */
+        right: 105px !important; /* Even more space from WhatsApp */
     }
     
     .scroll-to-top {
@@ -3652,9 +3654,10 @@ html {
 
 @media (max-width: 480px) {
     .social-link,
-    .btn-whatsapp,
-    [href*="wa.me"],
-    [href*="whatsapp"],
+    .footer .btn-whatsapp,
+    .contact .btn-whatsapp,
+    [href*="wa.me"]:not(.hero-buttons *),
+    [href*="whatsapp"]:not(.hero-buttons *),
     .floating-action-btn,
     .scroll-to-top,
     .phone-btn {
@@ -3662,9 +3665,10 @@ html {
         height: 56px !important;
     }
     
-    .btn-whatsapp,
-    [href*="wa.me"]:not(.nav-link):not(.quick-option),
-    [href*="whatsapp"]:not(.nav-link):not(.quick-option) {
+    .footer .btn-whatsapp,
+    .contact .btn-whatsapp,
+    [href*="wa.me"]:not(.nav-link):not(.quick-option):not(.hero-buttons *),
+    [href*="whatsapp"]:not(.nav-link):not(.quick-option):not(.hero-buttons *) {
         bottom: 80px !important;
         right: 15px !important;
     }
@@ -3672,7 +3676,7 @@ html {
     .phone-btn,
     [href^="tel:"] {
         bottom: 80px !important;
-        right: 90px !important; /* More space from WhatsApp */
+        right: 100px !important; /* Even more space from WhatsApp */
     }
 }
 
@@ -3689,9 +3693,10 @@ html {
         font-size: 18px !important;
     }
     
-    .btn-whatsapp,
-    [href*="wa.me"]:not(.nav-link):not(.quick-option),
-    [href*="whatsapp"]:not(.nav-link):not(.quick-option) {
+    .footer .btn-whatsapp,
+    .contact .btn-whatsapp,
+    [href*="wa.me"]:not(.nav-link):not(.quick-option):not(.hero-buttons *),
+    [href*="whatsapp"]:not(.nav-link):not(.quick-option):not(.hero-buttons *) {
         bottom: 75px !important;
         right: 12px !important;
     }
@@ -3699,6 +3704,6 @@ html {
     .phone-btn,
     [href^="tel:"] {
         bottom: 75px !important;
-        right: 85px !important; /* More space from WhatsApp */
+        right: 95px !important; /* Even more space from WhatsApp */
     }
 }
