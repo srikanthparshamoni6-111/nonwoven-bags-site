@@ -2716,7 +2716,7 @@ html {
 /* Chatbot Widget Container */
 #chatbot-widget {
     position: fixed;
-    bottom: 20px;
+    bottom: 250px; /* Position much higher above other floating icons on desktop */
     right: 20px;
     z-index: 9999;
     font-family: 'Poppins', sans-serif;
@@ -2725,7 +2725,7 @@ html {
 /* Mobile adjustments for chatbot */
 @media (max-width: 768px) {
     #chatbot-widget {
-        bottom: 120px; /* Move higher to avoid other floating buttons */
+        bottom: 280px; /* Position much higher above WhatsApp with ample spacing */
         right: 15px;
         z-index: 10000; /* Higher z-index for mobile */
     }
@@ -2736,16 +2736,18 @@ html {
     background: var(--gradient-primary);
     color: var(--white);
     border: none;
-    border-radius: 50px;
-    padding: 16px 24px;
+    border-radius: 50%;
     cursor: pointer;
     box-shadow: var(--shadow-lg);
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
     transition: var(--transition);
     position: relative;
     overflow: hidden;
+    width: 60px;
+    height: 60px;
+    padding: 0;
 }
 
 .chatbot-button:hover {
@@ -2769,30 +2771,12 @@ html {
 }
 
 .chatbot-button i {
-    font-size: 20px;
+    font-size: 22px;
     animation: pulse 2s infinite;
 }
 
-.chatbot-text {
-    font-weight: 600;
-    white-space: nowrap;
-}
-
 .chatbot-notification {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--accent-color);
-    color: var(--white);
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
-    animation: bounce 1s infinite;
+    display: none; /* Hide the red notification badge */
 }
 
 /* Chatbot Container */
@@ -3154,13 +3138,16 @@ html {
     }
     
     .chatbot-button {
-        padding: 12px 16px;
-        border-radius: 25px;
+        width: 56px;
+        height: 56px;
+        padding: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
-    .chatbot-text {
-        font-size: 12px;
-    }
+    
     
     .message-content {
         max-width: 90%;
@@ -3180,17 +3167,24 @@ html {
 
 @media (max-width: 480px) {
     #chatbot-widget {
-        bottom: 140px; /* Extra space to avoid all floating buttons */
-        right: 10px;
+        bottom: 270px; /* Position much higher above WhatsApp with ample spacing */
+        right: 15px;
     }
     
     .chatbot-button {
-        padding: 10px 14px;
+        width: 56px;
+        height: 56px;
+        padding: 0;
+        border-radius: 50%;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
-    .chatbot-text {
-        display: none; /* Hide text on very small screens */
+    .chatbot-button i {
+        font-size: 20px;
+        margin: 0;
     }
     
     .chatbot-container {
@@ -3536,14 +3530,7 @@ html {
         padding-bottom: 0;
     }
     
-    /* Better notification badge sizing */
-    .chatbot-notification {
-        width: 20px;
-        height: 20px;
-        font-size: 10px;
-        top: -3px;
-        right: -3px;
-    }
+    /* Notification badge is hidden */
     
     /* Improved chatbot header for mobile */
     .chatbot-header-info {
@@ -3568,13 +3555,13 @@ html {
 /* Very small screens (below 400px) */
 @media (max-width: 400px) {
     #chatbot-widget {
-        bottom: 160px;
-        right: 8px;
+        bottom: 260px; /* Position much higher above other icons with ample spacing */
+        right: 12px;
     }
     
     .chatbot-button {
-        width: 50px;
-        height: 50px;
+        width: 52px;
+        height: 52px;
         border-radius: 50%;
         padding: 0;
         display: flex;
@@ -3588,89 +3575,105 @@ html {
     }
 }
 
-/* Draggable Chatbot Widget */
-#chatbot-widget.dragging {
-    z-index: 10001;
-    opacity: 0.8;
-    transition: none;
-}
-
-#chatbot-widget.draggable {
-    cursor: move;
-    user-select: none;
-}
-
-#chatbot-widget.draggable:active {
-    cursor: grabbing;
-}
-
-/* Floating Button Stack Management */
-.floating-buttons-stack {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    z-index: 9998; /* Lower than chatbot */
-}
-
-/* Floating button spacing adjustments for mobile */
+/* Standardize all floating icons */
 @media (max-width: 768px) {
-    .floating-buttons-stack {
-        bottom: 15px;
-        right: 15px;
-        gap: 10px;
+    /* WhatsApp and other floating buttons consistency */
+    .social-link,
+    .btn-whatsapp,
+    [href*="wa.me"],
+    [href*="whatsapp"],
+    .floating-action-btn,
+    .scroll-to-top,
+    .phone-btn {
+        width: 56px !important;
+        height: 56px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        font-size: 20px !important;
+        position: fixed !important;
+        z-index: 9998 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
     }
     
-    /* Ensure other floating buttons don't interfere */
-    .whatsapp-float,
-    .phone-float,
-    .scroll-top,
-    .social-float {
-        position: relative !important;
-        bottom: auto !important;
-        right: auto !important;
-        margin: 0 !important;
+    /* Specific positioning for common floating icons */
+    .btn-whatsapp,
+    [href*="wa.me"]:not(.nav-link):not(.quick-option),
+    [href*="whatsapp"]:not(.nav-link):not(.quick-option) {
+        bottom: 100px !important;
+        right: 15px !important;
+    }
+    
+    .phone-btn,
+    [href^="tel:"] {
+        bottom: 100px !important;
+        right: 80px !important; /* Next to WhatsApp */
+    }
+    
+    .scroll-to-top {
+        bottom: 15px !important;
+        right: 15px !important;
+    }
+    
+    /* Ensure icons don't have text overflow */
+    .social-link span,
+    .btn-whatsapp span,
+    .floating-action-btn span {
+        display: none !important;
     }
 }
 
 @media (max-width: 480px) {
-    .floating-buttons-stack {
-        bottom: 10px;
-        right: 10px;
-        gap: 8px;
-    }
-}
-
-/* Chatbot Button Enhancements */
-.chatbot-button {
-    touch-action: none; /* Prevents scrolling when dragging */
-    position: relative;
-}
-
-.chatbot-button:active {
-    transform: scale(0.95);
-}
-
-/* Prevent content blocking */
-@media (max-width: 768px) {
-    /* Add padding to main content to prevent button overlap */
-    .footer {
-        padding-bottom: 180px !important;
+    .social-link,
+    .btn-whatsapp,
+    [href*="wa.me"],
+    [href*="whatsapp"],
+    .floating-action-btn,
+    .scroll-to-top,
+    .phone-btn {
+        width: 56px !important;
+        height: 56px !important;
     }
     
-    .contact {
-        padding-bottom: 100px !important;
+    .btn-whatsapp,
+    [href*="wa.me"]:not(.nav-link):not(.quick-option),
+    [href*="whatsapp"]:not(.nav-link):not(.quick-option) {
+        bottom: 100px !important;
+        right: 15px !important;
+    }
+    
+    .phone-btn,
+    [href^="tel:"] {
+        bottom: 100px !important;
+        right: 75px !important;
     }
 }
 
-@media (max-width: 480px) {
-    .footer {
-        padding-bottom: 200px !important;
+@media (max-width: 400px) {
+    .social-link,
+    .btn-whatsapp,
+    [href*="wa.me"],
+    [href*="whatsapp"],
+    .floating-action-btn,
+    .scroll-to-top,
+    .phone-btn {
+        width: 52px !important;
+        height: 52px !important;
+        font-size: 18px !important;
     }
     
-    .contact {
-        padding-bottom: 120px !important;
+    .btn-whatsapp,
+    [href*="wa.me"]:not(.nav-link):not(.quick-option),
+    [href*="whatsapp"]:not(.nav-link):not(.quick-option) {
+        bottom: 95px !important;
+        right: 12px !important;
+    }
+    
+    .phone-btn,
+    [href^="tel:"] {
+        bottom: 95px !important;
+        right: 70px !important;
     }
 }

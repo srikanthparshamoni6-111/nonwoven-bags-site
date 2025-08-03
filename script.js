@@ -982,7 +982,6 @@ class ChatbotAssistant {
     init() {
         this.bindEvents();
         this.setupConversationFlow();
-        this.initDraggable();
         // Show notification after 3 seconds
         setTimeout(() => {
             this.showNotification();
@@ -990,16 +989,10 @@ class ChatbotAssistant {
     }
 
     bindEvents() {
-        // Toggle chatbot - ensure this always works
-        const chatButton = document.getElementById('chatbot-button');
-        if (chatButton) {
-            chatButton.addEventListener('click', (e) => {
-                // Only toggle if not currently dragging
-                if (!e.target.closest('#chatbot-widget').classList.contains('dragging')) {
-                    this.toggleChatbot();
-                }
-            });
-        }
+        // Toggle chatbot
+        document.getElementById('chatbot-button')?.addEventListener('click', () => {
+            this.toggleChatbot();
+        });
 
         // Close chatbot
         document.getElementById('chatbot-close')?.addEventListener('click', () => {
@@ -2010,199 +2003,6 @@ What would you like to modify?`,
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-    }
-
-    // Make chatbot widget draggable
-    makeDraggable() {
-        const widget = document.getElementById('chatbot-widget');
-        const button = document.getElementById('chatbot-button');
-        
-        if (!widget || !button) return;
-        
-        // Check if device supports touch
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        
-        let isDragging = false;
-        let startX, startY, initialX, initialY;
-        
-        // Touch events for mobile (only if touch device)
-        if (isTouchDevice) {
-            let touchStartTime = 0;
-            let dragThreshold = 15; // pixels to move before considering it a drag
-            let timeThreshold = 300; // ms to hold before drag starts (increased for reliability)
-            
-            button.addEventListener('touchstart', (e) => {
-                if (this.isOpen) return; // Don't drag when chat is open
-                
-                touchStartTime = Date.now();
-                const touch = e.touches[0];
-                startX = touch.clientX;
-                startY = touch.clientY;
-                
-                const rect = widget.getBoundingClientRect();
-                initialX = rect.left;
-                initialY = rect.top;
-                
-                // Don't prevent default immediately - let tap work normally
-            }, { passive: true });
-            
-            button.addEventListener('touchmove', (e) => {
-                const touch = e.touches[0];
-                const deltaX = Math.abs(touch.clientX - startX);
-                const deltaY = Math.abs(touch.clientY - startY);
-                const totalDelta = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                const timeDelta = Date.now() - touchStartTime;
-                
-                // Only start dragging if moved enough AND held long enough
-                if (!isDragging && totalDelta > dragThreshold && timeDelta > timeThreshold) {
-                    isDragging = true;
-                    widget.classList.add('dragging', 'draggable');
-                    e.preventDefault();
-                }
-                
-                if (!isDragging) return;
-                
-                e.preventDefault();
-                
-                const newX = initialX + (touch.clientX - startX);
-                const newY = initialY + (touch.clientY - startY);
-                
-                // Keep within viewport bounds
-                const maxX = window.innerWidth - widget.offsetWidth;
-                const maxY = window.innerHeight - widget.offsetHeight;
-                
-                const boundedX = Math.max(0, Math.min(newX, maxX));
-                const boundedY = Math.max(0, Math.min(newY, maxY));
-                
-                widget.style.position = 'fixed';
-                widget.style.left = boundedX + 'px';
-                widget.style.top = boundedY + 'px';
-                widget.style.bottom = 'auto';
-                widget.style.right = 'auto';
-            }, { passive: false });
-            
-            button.addEventListener('touchend', (e) => {
-                const timeDelta = Date.now() - touchStartTime;
-                
-                if (isDragging) {
-                    // End dragging
-                    isDragging = false;
-                    widget.classList.remove('dragging');
-                    
-                    // Snap to edges for better UX
-                    this.snapToEdge(widget);
-                    
-                    e.preventDefault();
-                } else if (timeDelta < timeThreshold) {
-                    // Quick tap - let it work normally to open chatbot
-                    // Don't prevent default to allow normal click behavior
-                    return;
-                }
-            }, { passive: false });
-        }
-        
-        // Mouse events for desktop
-        button.addEventListener('mousedown', (e) => {
-            if (this.isOpen) return;
-            
-            isDragging = true;
-            widget.classList.add('dragging', 'draggable');
-            
-            startX = e.clientX;
-            startY = e.clientY;
-            
-            const rect = widget.getBoundingClientRect();
-            initialX = rect.left;
-            initialY = rect.top;
-            
-            e.preventDefault();
-        });
-        
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            
-            e.preventDefault();
-            
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-            
-            const newX = initialX + deltaX;
-            const newY = initialY + deltaY;
-            
-            const maxX = window.innerWidth - widget.offsetWidth;
-            const maxY = window.innerHeight - widget.offsetHeight;
-            
-            const boundedX = Math.max(0, Math.min(newX, maxX));
-            const boundedY = Math.max(0, Math.min(newY, maxY));
-            
-            widget.style.position = 'fixed';
-            widget.style.left = boundedX + 'px';
-            widget.style.top = boundedY + 'px';
-            widget.style.bottom = 'auto';
-            widget.style.right = 'auto';
-        });
-        
-        document.addEventListener('mouseup', () => {
-            if (!isDragging) return;
-            
-            isDragging = false;
-            widget.classList.remove('dragging');
-            
-            this.snapToEdge(widget);
-        });
-    }
-    
-    // Snap widget to nearest edge for better UX
-    snapToEdge(widget) {
-        const rect = widget.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const screenWidth = window.innerWidth;
-        
-        // Snap to left or right edge
-        if (centerX < screenWidth / 2) {
-            // Snap to left
-            widget.style.left = '15px';
-            widget.style.right = 'auto';
-        } else {
-            // Snap to right
-            widget.style.right = '15px';
-            widget.style.left = 'auto';
-        }
-        
-        // Keep current vertical position
-        const currentTop = rect.top;
-        const maxTop = window.innerHeight - widget.offsetHeight - 20;
-        const boundedTop = Math.max(20, Math.min(currentTop, maxTop));
-        
-        widget.style.top = boundedTop + 'px';
-        widget.style.bottom = 'auto';
-    }
-
-    // Initialize draggable functionality
-    initDraggable() {
-        // Wait for DOM to be ready
-        setTimeout(() => {
-            try {
-                this.makeDraggable();
-            } catch (error) {
-                console.log('Draggable functionality not available, chatbot will work normally');
-                // Ensure basic chatbot functionality still works
-                this.ensureBasicFunctionality();
-            }
-        }, 500);
-    }
-    
-    // Ensure basic chatbot functionality works
-    ensureBasicFunctionality() {
-        const button = document.getElementById('chatbot-button');
-        if (button) {
-            // Remove any problematic event listeners and add basic click
-            button.addEventListener('click', (e) => {
-                if (!this.isOpen) {
-                    this.toggleChatbot();
-                }
-            });
-        }
     }
 }
 
