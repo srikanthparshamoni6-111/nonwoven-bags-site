@@ -3600,6 +3600,31 @@ html {
     }
 }
 
+/* Mobile-specific extreme spacing for phone icon */
+@media (max-width: 768px) {
+    /* Ultimate phone icon positioning for mobile - prevent all overlap */
+    .phone-btn,
+    [href^="tel:"],
+    a[href^="tel:"] {
+        right: 220px !important;
+        bottom: 80px !important;
+        position: fixed !important;
+        z-index: 9998 !important;
+    }
+}
+
+/* Extra small mobile screens - even more spacing */
+@media (max-width: 600px) {
+    .phone-btn,
+    [href^="tel:"],
+    a[href^="tel:"] {
+        right: 200px !important;
+        bottom: 80px !important;
+        position: fixed !important;
+        z-index: 9998 !important;
+    }
+}
+
 /* Standardize all floating icons */
 @media (max-width: 768px) {
     /* Floating buttons only - completely exclude hero section buttons */
@@ -3649,7 +3674,7 @@ html {
     .phone-btn,
     [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 80px !important;
-        right: 150px !important; /* Phone with massive gap from WhatsApp to prevent overlap */
+        right: 200px !important; /* Phone with extreme gap from WhatsApp for mobile */
     }
     
     .scroll-to-top {
@@ -3657,9 +3682,12 @@ html {
         right: 15px !important; /* Arrow at bottom */
     }
     
-    /* Force phone icon spacing to prevent any overlap */
-    .phone-btn {
-        right: 150px !important;
+    /* Force phone icon spacing to prevent any overlap on mobile */
+    .phone-btn,
+    [href^="tel:"] {
+        right: 200px !important;
+        bottom: 80px !important;
+        position: fixed !important;
     }
     
     /* Ensure icons don't have text overflow */
@@ -3706,12 +3734,15 @@ html {
     .phone-btn,
     [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 80px !important;
-        right: 140px !important; /* Phone with massive spacing from WhatsApp to prevent overlap */
+        right: 180px !important; /* Phone with extreme spacing from WhatsApp for 480px mobile */
     }
     
     /* Force phone icon spacing on 480px screens */
-    .phone-btn {
-        right: 140px !important;
+    .phone-btn,
+    [href^="tel:"] {
+        right: 180px !important;
+        bottom: 80px !important;
+        position: fixed !important;
     }
 }
 
@@ -3750,11 +3781,14 @@ html {
     .phone-btn,
     [href^="tel:"]:not(.hero-buttons [href^="tel:"]) {
         bottom: 75px !important;
-        right: 130px !important; /* Phone with massive spacing from WhatsApp to prevent overlap */
+        right: 160px !important; /* Phone with extreme spacing from WhatsApp for 400px mobile */
     }
     
     /* Force phone icon spacing on 400px screens */
-    .phone-btn {
-        right: 130px !important;
+    .phone-btn,
+    [href^="tel:"] {
+        right: 160px !important;
+        bottom: 75px !important;
+        position: fixed !important;
     }
 }
