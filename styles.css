@@ -2716,7 +2716,7 @@ html {
 /* Chatbot Widget Container - Business Priority */
 #chatbot-widget {
     position: fixed;
-    bottom: 140px; /* Position above WhatsApp button */
+    bottom: 170px; /* Increased spacing above WhatsApp button */
     right: 20px; /* Right side positioning */
     z-index: 10001; /* Highest priority - this is our lead generation tool */
     font-family: 'Poppins', sans-serif;
@@ -2725,36 +2725,51 @@ html {
 /* Mobile adjustments for chatbot */
 @media (max-width: 768px) {
     #chatbot-widget {
-        bottom: 120px; /* Above WhatsApp button */
+        bottom: 160px; /* Increased spacing above WhatsApp button */
         right: 15px; /* Right side positioning */
         left: auto; /* Reset left positioning */
         z-index: 10001; /* Highest priority */
     }
+    
+    .chatbot-button {
+        width: 55px;
+        height: 55px;
+    }
+    
+    .chatbot-button i {
+        font-size: 22px;
+    }
 }
 
-/* Chatbot Button - Business Priority */
+/* Chatbot Button - Circular Design Like WhatsApp */
 .chatbot-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
     color: var(--white);
     border: none;
-    border-radius: 25px;
-    padding: 14px 20px;
+    border-radius: 50%; /* Perfect circle */
+    width: 60px; /* Fixed circular dimensions */
+    height: 60px;
     cursor: pointer;
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
     display: flex;
     align-items: center;
-    gap: 8px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    justify-content: center; /* Center the icon */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    min-width: 140px;
     font-weight: 600;
+    border: 3px solid rgba(255, 255, 255, 0.2);
 }
 
 .chatbot-button:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(79, 70, 229, 0.6);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #f472b6 100%);
+}
+
+.chatbot-button:active {
+    transform: translateY(-2px) scale(1.02);
+    transition: all 0.1s ease;
 }
 
 .chatbot-button:before {
@@ -2784,28 +2799,28 @@ html {
 
 .chatbot-notification {
     position: absolute;
-    top: -8px;
-    right: -8px;
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    top: -3px;
+    right: -3px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: var(--white);
     border-radius: 50%;
-    width: 26px;
-    height: 26px;
+    width: 16px;
+    height: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
-    font-weight: 700;
-    animation: pulse 2s infinite;
-    border: 3px solid white;
+    font-size: 9px;
+    font-weight: 600;
+    animation: pulse 3s infinite;
+    border: 2px solid white;
     box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
 }
 
 /* Chatbot Container */
 .chatbot-container {
     position: absolute;
-    bottom: 70px;
-    right: 0; /* Position relative to right side */
+    bottom: 80px; /* Position above circular button */
+    right: -10px; /* Align with right side */
     width: 380px;
     max-width: calc(100vw - 40px);
     height: 500px;
@@ -3189,11 +3204,20 @@ html {
 
 @media (max-width: 480px) {
     #chatbot-widget {
-        bottom: 110px; /* Above WhatsApp button */
+        bottom: 150px; /* Increased spacing above WhatsApp button */
         right: 10px; /* Right side positioning */
         left: auto;
     }
     
+    .chatbot-button {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .chatbot-button i {
+        font-size: 20px;
+    }
+}    
     .chatbot-button {
         padding: 10px 14px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -3578,10 +3602,20 @@ html {
 /* Very small screens (below 400px) */
 @media (max-width: 400px) {
     #chatbot-widget {
-        bottom: 100px; /* Above WhatsApp button */
+        bottom: 140px; /* Increased spacing above WhatsApp button */
         right: 8px; /* Right side positioning */
         left: auto;
     }
+    
+    .chatbot-button {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .chatbot-button i {
+        font-size: 18px;
+    }
+}
     
     .chatbot-button {
         width: 50px;
@@ -3721,11 +3755,12 @@ html {
     /* Ensure chatbot is prominently positioned */
     #chatbot-widget {
         position: fixed !important;
-        bottom: 110px !important;
+        bottom: 150px !important;
         right: 10px !important;
         left: auto !important;
         top: auto !important;
     }
+}
     
     /* Ensure other floating buttons don't interfere */
     .whatsapp-float,
@@ -3745,8 +3780,18 @@ html {
     #chatbot-widget {
         right: 5px !important;
         left: auto !important;
-        bottom: 95px !important;
+        bottom: 135px !important;
     }
+    
+    .chatbot-button {
+        width: 45px !important;
+        height: 45px !important;
+    }
+    
+    .chatbot-button i {
+        font-size: 16px !important;
+    }
+}
     
     .chatbot-button {
         padding: 6px 10px;
@@ -3847,25 +3892,25 @@ html {
 
 /* Advanced User-Friendly Chatbot Features */
 
-/* Enhanced Button Design */
+/* Enhanced Button Design - Circular like WhatsApp */
 .chatbot-button {
     background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
     color: var(--white);
     border: none;
-    border-radius: 30px;
-    padding: 16px 22px;
+    border-radius: 50%; /* Make it perfectly circular */
+    width: 60px; /* Fixed width */
+    height: 60px; /* Fixed height */
     cursor: pointer;
-    box-shadow: 0 10px 30px rgba(79, 70, 229, 0.4);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    min-width: 160px;
     font-weight: 600;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 3px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Advanced Hover Effects */
@@ -3880,9 +3925,20 @@ html {
     transition: all 0.1s ease;
 }
 
-/* Modern Icon Styling */
+/* Modern Icon Styling - Larger for circular button */
 .chatbot-button i {
-    font-size: 18px;
+    font-size: 24px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Hide text in circular button - Override all instances */
+#chatbot-widget .chatbot-text {
+    display: none !important;
+}
+
+/* Icon styling for circular button */
+#chatbot-widget .chatbot-button i {
+    font-size: 24px !important;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
@@ -4104,4 +4160,94 @@ html {
 
 .welcome-animation {
     animation: welcomeBounce 2s ease-in-out;
+}
+
+/* FINAL CHATBOT CIRCULAR DESIGN - HIGHEST PRIORITY */
+#chatbot-widget .chatbot-button {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    min-width: unset !important;
+    max-width: unset !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%) !important;
+    border: 3px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4) !important;
+}
+
+#chatbot-widget .chatbot-button:hover {
+    transform: translateY(-4px) scale(1.05) !important;
+    box-shadow: 0 15px 40px rgba(79, 70, 229, 0.6) !important;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #f472b6 100%) !important;
+}
+
+#chatbot-widget .chatbot-text {
+    display: none !important;
+}
+
+#chatbot-widget .chatbot-button i {
+    font-size: 24px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Mobile responsive circular design */
+@media (max-width: 768px) {
+    #chatbot-widget .chatbot-button {
+        width: 55px !important;
+        height: 55px !important;
+    }
+    
+    #chatbot-widget .chatbot-button i {
+        font-size: 22px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #chatbot-widget .chatbot-button {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    #chatbot-widget .chatbot-button i {
+        font-size: 20px !important;
+    }
+}
+
+@media (max-width: 400px) {
+    #chatbot-widget .chatbot-button {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    
+    #chatbot-widget .chatbot-button i {
+        font-size: 18px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    #chatbot-widget .chatbot-button {
+        width: 45px !important;
+        height: 45px !important;
+    }
+    
+    #chatbot-widget .chatbot-button i {
+        font-size: 16px !important;
+    }
+}
+
+/* Option to hide notification badge completely for cleaner look */
+#chatbot-widget .chatbot-notification {
+    display: none !important;
+    /* Uncomment below to show small badge instead
+    width: 12px !important;
+    height: 12px !important;
+    top: -2px !important;
+    right: -2px !important;
+    font-size: 8px !important;
+    border: 1px solid white !important;
+    */
 }

@@ -987,6 +987,7 @@ class ChatbotAssistant {
         this.setupConversationFlow();
         this.initDraggable();
         this.initAdvancedFeatures();
+        this.initMobileOptimizations(); // Add mobile-specific optimizations
         // Show notification after 3 seconds
         setTimeout(() => {
             this.showNotification();
@@ -2145,10 +2146,10 @@ What would you like to modify?`,
             widget.style.left = 'auto';
         }
         
-        // Keep current vertical position but ensure visibility
+        // Keep current vertical position but ensure visibility above WhatsApp
         const currentBottom = screenHeight - rect.bottom;
         const maxBottom = screenHeight - widget.offsetHeight - 20;
-        const minBottom = 80; // Stay above WhatsApp button
+        const minBottom = 120; // Stay well above WhatsApp button (increased for better spacing)
         const boundedBottom = Math.max(minBottom, Math.min(currentBottom, maxBottom));
         
         widget.style.bottom = boundedBottom + 'px';
@@ -2328,6 +2329,32 @@ What would you like to modify?`,
                 resolve();
             }
         });
+    }
+
+    // Mobile-specific initialization
+    initMobileOptimizations() {
+        // Prevent zoom on double tap for chatbot button
+        const button = document.getElementById('chatbot-button');
+        if (button) {
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleChat();
+            }, { passive: false });
+        }
+
+        // Ensure touch events work properly on mobile
+        document.addEventListener('touchstart', () => {}, { passive: true });
+        
+        // Fix iOS viewport height issues
+        const setViewportHeight = () => {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        };
+        
+        setViewportHeight();
+        window.addEventListener('resize', setViewportHeight);
+        window.addEventListener('orientationchange', setViewportHeight);
     }
 }
 
