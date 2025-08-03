@@ -3626,7 +3626,7 @@ a[href^="tel:"] i {
     .quick-contact .btn-whatsapp,
     [href*="wa.me"]:not(.hero-buttons [href*="wa.me"]):not(.nav-link):not(.quick-option),
     [href*="whatsapp"]:not(.hero-buttons [href*="whatsapp"]):not(.nav-link):not(.quick-option) {
-        bottom: 150px !important; /* WhatsApp at top */
+        bottom: 170px !important; /* WhatsApp at top - increased spacing */
         right: 15px !important;
         width: 56px !important;
         height: 56px !important;
