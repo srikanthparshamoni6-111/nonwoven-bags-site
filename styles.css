@@ -2725,7 +2725,7 @@ html {
 /* Mobile adjustments for chatbot */
 @media (max-width: 768px) {
     #chatbot-widget {
-        bottom: 80px; /* Move up to avoid conflicts with mobile navigation */
+        bottom: 120px; /* Move higher to avoid other floating buttons */
         right: 15px;
         z-index: 10000; /* Higher z-index for mobile */
     }
@@ -3180,7 +3180,7 @@ html {
 
 @media (max-width: 480px) {
     #chatbot-widget {
-        bottom: 90px; /* Extra space for mobile navigation */
+        bottom: 140px; /* Extra space to avoid all floating buttons */
         right: 10px;
     }
     
@@ -3568,7 +3568,7 @@ html {
 /* Very small screens (below 400px) */
 @media (max-width: 400px) {
     #chatbot-widget {
-        bottom: 100px;
+        bottom: 160px;
         right: 8px;
     }
     
@@ -3585,5 +3585,92 @@ html {
     .chatbot-button i {
         font-size: 18px;
         margin: 0;
+    }
+}
+
+/* Draggable Chatbot Widget */
+#chatbot-widget.dragging {
+    z-index: 10001;
+    opacity: 0.8;
+    transition: none;
+}
+
+#chatbot-widget.draggable {
+    cursor: move;
+    user-select: none;
+}
+
+#chatbot-widget.draggable:active {
+    cursor: grabbing;
+}
+
+/* Floating Button Stack Management */
+.floating-buttons-stack {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 9998; /* Lower than chatbot */
+}
+
+/* Floating button spacing adjustments for mobile */
+@media (max-width: 768px) {
+    .floating-buttons-stack {
+        bottom: 15px;
+        right: 15px;
+        gap: 10px;
+    }
+    
+    /* Ensure other floating buttons don't interfere */
+    .whatsapp-float,
+    .phone-float,
+    .scroll-top,
+    .social-float {
+        position: relative !important;
+        bottom: auto !important;
+        right: auto !important;
+        margin: 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .floating-buttons-stack {
+        bottom: 10px;
+        right: 10px;
+        gap: 8px;
+    }
+}
+
+/* Chatbot Button Enhancements */
+.chatbot-button {
+    touch-action: none; /* Prevents scrolling when dragging */
+    position: relative;
+}
+
+.chatbot-button:active {
+    transform: scale(0.95);
+}
+
+/* Prevent content blocking */
+@media (max-width: 768px) {
+    /* Add padding to main content to prevent button overlap */
+    .footer {
+        padding-bottom: 180px !important;
+    }
+    
+    .contact {
+        padding-bottom: 100px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer {
+        padding-bottom: 200px !important;
+    }
+    
+    .contact {
+        padding-bottom: 120px !important;
     }
 }

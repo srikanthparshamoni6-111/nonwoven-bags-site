@@ -982,6 +982,7 @@ class ChatbotAssistant {
     init() {
         this.bindEvents();
         this.setupConversationFlow();
+        this.initDraggable();
         // Show notification after 3 seconds
         setTimeout(() => {
             this.showNotification();
@@ -2003,6 +2004,157 @@ What would you like to modify?`,
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // Make chatbot widget draggable
+    makeDraggable() {
+        const widget = document.getElementById('chatbot-widget');
+        const button = document.getElementById('chatbot-button');
+        
+        if (!widget || !button) return;
+        
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+        
+        // Touch events for mobile
+        button.addEventListener('touchstart', (e) => {
+            if (this.isOpen) return; // Don't drag when chat is open
+            
+            isDragging = true;
+            widget.classList.add('dragging', 'draggable');
+            
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            
+            const rect = widget.getBoundingClientRect();
+            initialX = rect.left;
+            initialY = rect.top;
+            
+            e.preventDefault();
+        }, { passive: false });
+        
+        button.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - startX;
+            const deltaY = touch.clientY - startY;
+            
+            const newX = initialX + deltaX;
+            const newY = initialY + deltaY;
+            
+            // Keep within viewport bounds
+            const maxX = window.innerWidth - widget.offsetWidth;
+            const maxY = window.innerHeight - widget.offsetHeight;
+            
+            const boundedX = Math.max(0, Math.min(newX, maxX));
+            const boundedY = Math.max(0, Math.min(newY, maxY));
+            
+            widget.style.position = 'fixed';
+            widget.style.left = boundedX + 'px';
+            widget.style.top = boundedY + 'px';
+            widget.style.bottom = 'auto';
+            widget.style.right = 'auto';
+        }, { passive: false });
+        
+        button.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            widget.classList.remove('dragging');
+            
+            // Snap to edges for better UX
+            this.snapToEdge(widget);
+            
+            e.preventDefault();
+        }, { passive: false });
+        
+        // Mouse events for desktop
+        button.addEventListener('mousedown', (e) => {
+            if (this.isOpen) return;
+            
+            isDragging = true;
+            widget.classList.add('dragging', 'draggable');
+            
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            const rect = widget.getBoundingClientRect();
+            initialX = rect.left;
+            initialY = rect.top;
+            
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            const newX = initialX + deltaX;
+            const newY = initialY + deltaY;
+            
+            const maxX = window.innerWidth - widget.offsetWidth;
+            const maxY = window.innerHeight - widget.offsetHeight;
+            
+            const boundedX = Math.max(0, Math.min(newX, maxX));
+            const boundedY = Math.max(0, Math.min(newY, maxY));
+            
+            widget.style.position = 'fixed';
+            widget.style.left = boundedX + 'px';
+            widget.style.top = boundedY + 'px';
+            widget.style.bottom = 'auto';
+            widget.style.right = 'auto';
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            widget.classList.remove('dragging');
+            
+            this.snapToEdge(widget);
+        });
+    }
+    
+    // Snap widget to nearest edge for better UX
+    snapToEdge(widget) {
+        const rect = widget.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const screenWidth = window.innerWidth;
+        
+        // Snap to left or right edge
+        if (centerX < screenWidth / 2) {
+            // Snap to left
+            widget.style.left = '15px';
+            widget.style.right = 'auto';
+        } else {
+            // Snap to right
+            widget.style.right = '15px';
+            widget.style.left = 'auto';
+        }
+        
+        // Keep current vertical position
+        const currentTop = rect.top;
+        const maxTop = window.innerHeight - widget.offsetHeight - 20;
+        const boundedTop = Math.max(20, Math.min(currentTop, maxTop));
+        
+        widget.style.top = boundedTop + 'px';
+        widget.style.bottom = 'auto';
+    }
+
+    // Initialize draggable functionality
+    initDraggable() {
+        // Wait for DOM to be ready
+        setTimeout(() => {
+            this.makeDraggable();
+        }, 500);
     }
 }
 
