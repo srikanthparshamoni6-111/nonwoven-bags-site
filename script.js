@@ -976,6 +976,9 @@ class ChatbotAssistant {
         this.orderGenerated = false; // Track if WhatsApp order was already generated
         this.currentOrderId = null; // Track current order for modifications
         this.isModifying = false; // Track if we're modifying an existing order
+        this.hasShownWelcome = false; // Track welcome message
+        this.autoOpenTriggered = false; // Track auto-open
+        this.scrollThreshold = 50; // Scroll percentage for auto-open
         this.init();
     }
 
@@ -983,6 +986,7 @@ class ChatbotAssistant {
         this.bindEvents();
         this.setupConversationFlow();
         this.initDraggable();
+        this.initAdvancedFeatures();
         // Show notification after 3 seconds
         setTimeout(() => {
             this.showNotification();
@@ -2128,26 +2132,27 @@ What would you like to modify?`,
         const rect = widget.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
         
         // Snap to left or right edge with business logic
         if (centerX < screenWidth / 2) {
-            // Snap to left - default position for business visibility
+            // Snap to left
             widget.style.left = '15px';
             widget.style.right = 'auto';
         } else {
-            // Snap to right - but avoid other floating buttons
-            widget.style.right = '80px'; // Leave space for WhatsApp/phone buttons
+            // Snap to right - default position above WhatsApp
+            widget.style.right = '20px';
             widget.style.left = 'auto';
         }
         
         // Keep current vertical position but ensure visibility
-        const currentTop = rect.top;
-        const maxTop = window.innerHeight - widget.offsetHeight - 20;
-        const minTop = 20;
-        const boundedTop = Math.max(minTop, Math.min(currentTop, maxTop));
+        const currentBottom = screenHeight - rect.bottom;
+        const maxBottom = screenHeight - widget.offsetHeight - 20;
+        const minBottom = 80; // Stay above WhatsApp button
+        const boundedBottom = Math.max(minBottom, Math.min(currentBottom, maxBottom));
         
-        widget.style.top = boundedTop + 'px';
-        widget.style.bottom = 'auto';
+        widget.style.bottom = boundedBottom + 'px';
+        widget.style.top = 'auto';
         
         // Ensure high z-index after dragging
         widget.style.zIndex = '10001';
@@ -2159,6 +2164,170 @@ What would you like to modify?`,
         setTimeout(() => {
             this.makeDraggable();
         }, 500);
+    }
+
+    // Advanced user-friendly features
+    initAdvancedFeatures() {
+        this.initScrollBasedAutoOpen();
+        this.initSmartNotifications();
+        this.initTypingIndicator();
+        this.initWelcomeSequence();
+    }
+
+    // Auto-open chatbot when user scrolls down (shows engagement)
+    initScrollBasedAutoOpen() {
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+                
+                if (scrollPercent > this.scrollThreshold && !this.autoOpenTriggered && !this.isOpen) {
+                    this.autoOpenTriggered = true;
+                    this.showWelcomeMessage();
+                    
+                    // Add gentle bounce animation to attract attention
+                    const button = document.getElementById('chatbot-button');
+                    if (button) {
+                        button.classList.add('welcome-animation');
+                        setTimeout(() => {
+                            button.classList.remove('welcome-animation');
+                        }, 2000);
+                    }
+                }
+            }, 300);
+        });
+    }
+
+    // Smart notifications based on user behavior
+    initSmartNotifications() {
+        // Show different notifications based on page sections
+        const sections = ['products', 'order', 'contact'];
+        
+        sections.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && !this.isOpen) {
+                            this.updateNotificationForSection(sectionId);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(section);
+            }
+        });
+    }
+
+    // Update notification based on current section
+    updateNotificationForSection(sectionId) {
+        const notification = document.getElementById('chatbot-notification');
+        if (!notification) return;
+
+        switch(sectionId) {
+            case 'products':
+                notification.textContent = '?';
+                notification.title = 'Need help choosing the right bag?';
+                break;
+            case 'order':
+                notification.textContent = '$';
+                notification.title = 'Get instant price quotes!';
+                break;
+            case 'contact':
+                notification.textContent = '!';
+                notification.title = 'Quick support available!';
+                break;
+            default:
+                notification.textContent = '!';
+        }
+    }
+
+    // Typing indicator for more natural conversation
+    initTypingIndicator() {
+        this.typingIndicatorHtml = `
+            <div class="chatbot-message bot-message typing-indicator" id="typing-indicator">
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <div style="display: flex; align-items: center; gap: 4px; padding: 8px 0;">
+                        <span style="font-size: 14px; color: #64748b; margin-right: 8px;">SV Assistant is typing</span>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Show typing indicator
+    showTypingIndicator() {
+        const messagesContainer = document.getElementById('chatbot-messages');
+        if (messagesContainer && !document.getElementById('typing-indicator')) {
+            messagesContainer.insertAdjacentHTML('beforeend', this.typingIndicatorHtml);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    }
+
+    // Hide typing indicator
+    hideTypingIndicator() {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+
+    // Enhanced welcome sequence
+    initWelcomeSequence() {
+        // Welcome message after 5 seconds if user hasn't interacted
+        setTimeout(() => {
+            if (!this.hasShownWelcome && !this.isOpen) {
+                this.showWelcomeMessage();
+            }
+        }, 5000);
+    }
+
+    // Show welcome message with animation
+    showWelcomeMessage() {
+        if (this.hasShownWelcome) return;
+        
+        this.hasShownWelcome = true;
+        const button = document.getElementById('chatbot-button');
+        const notification = document.getElementById('chatbot-notification');
+        
+        if (button && notification) {
+            // Add pulsing animation
+            button.style.animation = 'subtlePulse 2s ease-in-out 3';
+            notification.textContent = '👋';
+            notification.title = 'Welcome! Need help finding the perfect bags?';
+            
+            // Reset after animation
+            setTimeout(() => {
+                button.style.animation = 'subtlePulse 3s ease-in-out infinite';
+                notification.textContent = '!';
+            }, 6000);
+        }
+    }
+
+    // Enhanced message display with typing effect
+    displayMessageWithTyping(message, isBot = true) {
+        return new Promise(resolve => {
+            if (isBot) {
+                this.showTypingIndicator();
+                
+                // Simulate thinking time
+                setTimeout(() => {
+                    this.hideTypingIndicator();
+                    this.displayMessage(message, isBot);
+                    resolve();
+                }, 1000 + Math.random() * 1000); // 1-2 seconds
+            } else {
+                this.displayMessage(message, isBot);
+                resolve();
+            }
+        });
     }
 }
 
