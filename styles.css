@@ -2713,44 +2713,48 @@ html {
    CHATBOT WIDGET STYLES
    ================================ */
 
-/* Chatbot Widget Container */
+/* Chatbot Widget Container - Business Priority */
 #chatbot-widget {
     position: fixed;
     bottom: 20px;
-    right: 20px;
-    z-index: 9999;
+    left: 20px; /* Move to left side for better visibility */
+    z-index: 10001; /* Highest priority - this is our lead generation tool */
     font-family: 'Poppins', sans-serif;
 }
 
 /* Mobile adjustments for chatbot */
 @media (max-width: 768px) {
     #chatbot-widget {
-        bottom: 80px; /* Keep within visible viewport */
-        right: 75px; /* Move left to avoid WhatsApp button */
-        z-index: 10000; /* Higher z-index for mobile */
+        bottom: 20px; /* Keep low and visible */
+        left: 15px; /* Left side positioning */
+        right: auto; /* Reset right positioning */
+        z-index: 10001; /* Highest priority */
     }
 }
 
-/* Chatbot Button */
+/* Chatbot Button - Business Priority */
 .chatbot-button {
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: var(--white);
     border: none;
-    border-radius: 50px;
-    padding: 16px 24px;
+    border-radius: 25px;
+    padding: 14px 20px;
     cursor: pointer;
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
     display: flex;
     align-items: center;
-    gap: 10px;
-    transition: var(--transition);
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    min-width: 140px;
+    font-weight: 600;
 }
 
 .chatbot-button:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
 .chatbot-button:before {
@@ -2780,38 +2784,41 @@ html {
 
 .chatbot-notification {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--accent-color);
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
     color: var(--white);
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
-    animation: bounce 1s infinite;
+    font-size: 13px;
+    font-weight: 700;
+    animation: pulse 2s infinite;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
 }
 
 /* Chatbot Container */
 .chatbot-container {
     position: absolute;
-    bottom: 80px;
-    right: 0;
+    bottom: 70px;
+    left: 0; /* Position relative to left side */
     width: 380px;
     max-width: calc(100vw - 40px);
     height: 500px;
     background: var(--white);
     border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
     display: none;
     flex-direction: column;
     overflow: hidden;
     transform: scale(0.8) translateY(20px);
     opacity: 0;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10002; /* Above everything when open */
 }
 
 .chatbot-container.active {
@@ -3149,7 +3156,8 @@ html {
         width: calc(100vw - 20px);
         height: 70vh;
         bottom: 70px;
-        right: 10px;
+        left: 10px; /* Align with left-positioned button */
+        right: auto;
         max-height: 450px;
     }
     
@@ -3181,8 +3189,9 @@ html {
 
 @media (max-width: 480px) {
     #chatbot-widget {
-        bottom: 20px; /* Keep low but visible */
-        right: 80px; /* Create separation from other buttons */
+        bottom: 15px; /* Keep low but visible */
+        left: 10px; /* Left side - no competition */
+        right: auto;
     }
     
     .chatbot-button {
@@ -3569,8 +3578,9 @@ html {
 /* Very small screens (below 400px) */
 @media (max-width: 400px) {
     #chatbot-widget {
-        bottom: 15px;
-        right: 70px; /* Side-by-side with other buttons */
+        bottom: 10px;
+        left: 8px; /* Clear left positioning */
+        right: auto;
     }
     
     .chatbot-button {
@@ -3708,12 +3718,12 @@ html {
 }
 
 @media (max-width: 480px) {
-    /* Stack buttons horizontally on very small screens */
+    /* Ensure chatbot is prominently positioned */
     #chatbot-widget {
         position: fixed !important;
         bottom: 15px !important;
-        right: 75px !important;
-        left: auto !important;
+        left: 10px !important;
+        right: auto !important;
         top: auto !important;
     }
     
@@ -3733,7 +3743,8 @@ html {
 /* Extra small screens */
 @media (max-width: 360px) {
     #chatbot-widget {
-        right: 65px !important;
+        left: 5px !important;
+        right: auto !important;
     }
     
     .chatbot-button {
@@ -3759,5 +3770,76 @@ html {
     .whatsapp-float,
     .phone-float {
         touch-action: manipulation;
+    }
+}
+
+/* Business-focused chatbot enhancements */
+.chatbot-button {
+    animation: subtlePulse 3s ease-in-out infinite;
+}
+
+.chatbot-button:hover {
+    animation: none; /* Stop pulse on hover */
+}
+
+/* Subtle pulse animation for business attention */
+@keyframes subtlePulse {
+    0%, 100% {
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6), 0 0 0 8px rgba(102, 126, 234, 0.1);
+        transform: scale(1.02);
+    }
+}
+
+/* Enhanced visibility for business */
+#chatbot-widget {
+    filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.3));
+}
+
+/* Mobile business optimizations */
+@media (max-width: 768px) {
+    .chatbot-button {
+        animation: subtlePulse 4s ease-in-out infinite;
+        min-width: 120px;
+    }
+    
+    /* Ensure always visible on mobile */
+    #chatbot-widget {
+        filter: drop-shadow(0 2px 8px rgba(102, 126, 234, 0.4));
+    }
+}
+
+@media (max-width: 480px) {
+    .chatbot-button {
+        min-width: 100px;
+        padding: 12px 16px;
+    }
+    
+    .chatbot-text {
+        font-size: 12px;
+        font-weight: 600;
+    }
+}
+
+/* Business priority positioning */
+@media (max-width: 400px) {
+    .chatbot-button {
+        padding: 10px 14px;
+        min-width: 90px;
+    }
+}
+
+/* Ensure chatbot is prominent on very small screens */
+@media (max-width: 360px) {
+    .chatbot-button {
+        padding: 8px 12px;
+        min-width: 80px;
+    }
+    
+    .chatbot-text {
+        font-size: 11px;
     }
 }

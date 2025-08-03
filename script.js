@@ -2129,24 +2129,28 @@ What would you like to modify?`,
         const centerX = rect.left + rect.width / 2;
         const screenWidth = window.innerWidth;
         
-        // Snap to left or right edge
+        // Snap to left or right edge with business logic
         if (centerX < screenWidth / 2) {
-            // Snap to left
+            // Snap to left - default position for business visibility
             widget.style.left = '15px';
             widget.style.right = 'auto';
         } else {
-            // Snap to right
-            widget.style.right = '15px';
+            // Snap to right - but avoid other floating buttons
+            widget.style.right = '80px'; // Leave space for WhatsApp/phone buttons
             widget.style.left = 'auto';
         }
         
-        // Keep current vertical position
+        // Keep current vertical position but ensure visibility
         const currentTop = rect.top;
         const maxTop = window.innerHeight - widget.offsetHeight - 20;
-        const boundedTop = Math.max(20, Math.min(currentTop, maxTop));
+        const minTop = 20;
+        const boundedTop = Math.max(minTop, Math.min(currentTop, maxTop));
         
         widget.style.top = boundedTop + 'px';
         widget.style.bottom = 'auto';
+        
+        // Ensure high z-index after dragging
+        widget.style.zIndex = '10001';
     }
 
     // Initialize draggable functionality
