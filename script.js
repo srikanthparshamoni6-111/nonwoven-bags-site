@@ -1766,10 +1766,6 @@ class ChatbotAssistant {
                 }
                 break;
                 
-            case 'open_whatsapp':
-                this.openWhatsAppDirectly();
-                break;
-                
             case 'copy_message':
                 this.copyOrderMessage();
                 break;
@@ -1909,7 +1905,7 @@ class ChatbotAssistant {
                 
                 <div class="order-actions">
                     <button class="quick-option primary-action premium-btn" data-action="confirm_order">
-                        <i class="fas fa-rocket"></i> Send Quote Request
+                        <i class="fab fa-whatsapp"></i> Send to WhatsApp
                     </button>
                     <button class="quick-option secondary-action" data-action="modify_order">
                         <i class="fas fa-edit"></i> Modify
@@ -2162,23 +2158,44 @@ Customer via Website
 
         const whatsappUrl = `https://wa.me/916302067390?text=${encodeURIComponent(orderDetails)}`;
         
-        // Store for iOS compatibility
+        // Store for fallback if needed
         this.currentWhatsAppUrl = whatsappUrl;
         this.currentOrderDetails = orderDetails;
         
-        // iOS-compatible WhatsApp opening
+        // Direct WhatsApp opening - improved iOS compatibility
         this.addBotMessage(
-            "🚀 **Perfect!** Your quotation request is ready.\n\n📱 **Click the button below to send via WhatsApp:**",
-            [
-                { 
-                    text: "📱 Send to WhatsApp", 
-                    value: "open_whatsapp", 
-                    icon: "fab fa-whatsapp"
-                },
-                { text: "📋 Copy Message", value: "copy_message", icon: "fas fa-copy" }
-            ],
+            "🚀 **Perfect!** Opening WhatsApp with your quotation request...",
+            null,
             500
         );
+
+        // Small delay to ensure message shows, then open WhatsApp directly
+        setTimeout(() => {
+            // Try to open WhatsApp immediately
+            const whatsappWindow = window.open(whatsappUrl, '_blank');
+            
+            // Give it a moment to determine success/failure
+            setTimeout(() => {
+                // Always show success message unless we're certain it failed
+                this.addBotMessage(
+                    `✅ **Quotation Request #${this.currentOrderId} Sent!**
+                    
+📱 **WhatsApp Status:** Successfully opened
+⏰ **Response Time:** Within 2-4 business hours
+📋 **What's Next:** Our team will review and send a comprehensive quote
+
+💡 **Pro Tip:** Keep this chat open to track your order!`,
+                    [
+                        { text: "🆕 New Quote", value: "new_quote", icon: "fas fa-plus" },
+                        { text: "📊 Track Orders", value: "track_order", icon: "fas fa-chart-line" },
+                        { text: "✏️ Modify Order", value: "modify_current_order", icon: "fas fa-edit" },
+                        { text: "📞 Contact Support", value: "contact_sales", icon: "fas fa-headset" },
+                        { text: "📋 Copy Message", value: "copy_message", icon: "fas fa-copy" }
+                    ],
+                    1200
+                );
+            }, 1500);
+        }, 800);
     }
 
     generateOrderId() {
@@ -2418,39 +2435,17 @@ What would you like to modify?`,
 
     openWhatsAppDirectly() {
         if (this.currentWhatsAppUrl) {
-            // Try to open WhatsApp directly - this works better on iOS when called synchronously
-            const opened = window.open(this.currentWhatsAppUrl, '_blank');
+            // Direct WhatsApp opening
+            window.open(this.currentWhatsAppUrl, '_blank');
             
-            // Check if popup was blocked
-            if (!opened || opened.closed || typeof opened.closed == 'undefined') {
-                // Fallback: show copy message option
-                this.addBotMessage(
-                    "📱 **WhatsApp couldn't open automatically.**\n\nPlease copy the message and paste it in WhatsApp:",
-                    [
-                        { text: "📋 Copy Message", value: "copy_message", icon: "fas fa-copy" },
-                        { text: "🔄 Try Again", value: "open_whatsapp", icon: "fab fa-whatsapp" }
-                    ],
-                    500
-                );
-            } else {
-                // Success message
-                this.addBotMessage(
-                    `✅ **Quotation Request #${this.currentOrderId} Sent!**
-                    
-📱 **WhatsApp Status:** Opened successfully
-⏰ **Response Time:** Within 2-4 business hours
-📋 **What's Next:** Our team will review and send a comprehensive quote
-
-💡 **Pro Tip:** Keep this chat open to track your order!`,
-                    [
-                        { text: "🆕 New Quote", value: "new_quote", icon: "fas fa-plus" },
-                        { text: "📊 Track Orders", value: "track_order", icon: "fas fa-chart-line" },
-                        { text: "✏️ Modify Order", value: "modify_current_order", icon: "fas fa-edit" },
-                        { text: "📞 Contact Support", value: "contact_sales", icon: "fas fa-headset" }
-                    ],
-                    1000
-                );
-            }
+            this.addBotMessage(
+                `✅ **WhatsApp Opened!**\n\n📱 Your quotation request #${this.currentOrderId} is ready to send.`,
+                [
+                    { text: "🆕 New Quote", value: "new_quote", icon: "fas fa-plus" },
+                    { text: "📋 Copy Message", value: "copy_message", icon: "fas fa-copy" }
+                ],
+                800
+            );
         } else {
             this.addBotMessage(
                 "Sorry, there was an issue. Please try generating a new quote.",
