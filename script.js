@@ -1825,38 +1825,57 @@ class ChatbotAssistant {
         const estimatedPrice = this.getEstimatedPrice(quantity);
         
         const orderSummaryHtml = `
-            <div class="order-summary-card compact">
+            <div class="order-summary-card premium">
                 <div class="order-header">
                     <div class="order-icon">
                         <i class="${product.icon}"></i>
                     </div>
                     <div class="order-info">
-                        <h4>${product.name}</h4>
+                        <h4>🎯 ${product.name}</h4>
                         <div class="order-meta">
-                            <span class="order-id">#${Date.now().toString().slice(-6)}</span>
-                            <span class="price-badge">${estimatedPrice}</span>
+                            <span class="order-id">📋 Reference #${Date.now().toString().slice(-6)}</span>
+                            <span class="price-badge">💰 ${estimatedPrice}</span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="order-details">
-                    <div class="detail-item">
-                        <span class="label">📊 Quantity:</span>
-                        <span class="value">${quantityText}</span>
+                    <div class="detail-section">
+                        <h5>📊 Order Specifications</h5>
+                        <div class="detail-item">
+                            <span class="label">Required Quantity:</span>
+                            <span class="value highlight">${quantityText}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Investment Range:</span>
+                            <span class="value price">${estimatedPrice}</span>
+                        </div>
                     </div>
-                    <div class="detail-item">
-                        <span class="label">⭐ Features:</span>
-                        <span class="value">${product.features.slice(0, 2).join(' • ')}</span>
+                    
+                    <div class="detail-section">
+                        <h5>🌟 Premium Features</h5>
+                        <div class="features-list">
+                            ${product.features.slice(0, 3).map(feature => 
+                                `<div class="feature-item">✅ ${feature}</div>`
+                            ).join('')}
+                        </div>
                     </div>
                 </div>
                 
                 <div class="order-actions">
-                    <button class="quick-option primary-action" data-action="confirm_order">
-                        <i class="fab fa-whatsapp"></i> Send Order
+                    <button class="quick-option primary-action premium-btn" data-action="confirm_order">
+                        <i class="fas fa-rocket"></i> Send Quote Request
                     </button>
                     <button class="quick-option secondary-action" data-action="modify_order">
-                        <i class="fas fa-edit"></i> Edit
+                        <i class="fas fa-edit"></i> Modify
                     </button>
+                </div>
+                
+                <div class="order-footer">
+                    <div class="next-steps">
+                        <strong>⚡ What's Next:</strong>
+                        <span>Professional quote • Samples available • Custom solutions</span>
+                    </div>
                 </div>
             </div>
         `;
@@ -2018,72 +2037,101 @@ class ChatbotAssistant {
         // Determine if this is a modification
         const isModification = this.orderHistory.filter(order => order.id === this.currentOrderId).length > 1;
         
-        const orderDetails = `
-╔════════════════════════════════════════╗
-║     ${isModification ? '🔄 ORDER MODIFICATION REQUEST' : '🛍️ NEW ORDER REQUEST'}     ║
-╚════════════════════════════════════════╝
+        // Create professional date formatting
+        const now = new Date();
+        const orderDate = now.toLocaleDateString('en-US', { 
+            weekday: 'long',
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        const orderTime = now.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true,
+            timeZoneName: 'short'
+        });
 
-🏢 *SRIVENKATESHWARA NON WOVEN BAGS*
-📞 Contact: +91 6302067390
+        const orderDetails = `🏢 *SRIVENKATESHWARA NON WOVEN BAGS*
+📍 *Premium Quality • Eco-Friendly Solutions*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-┌─────────────────────────────────────────┐
-│              ORDER DETAILS              │
-├─────────────────────────────────────────┤
-│ 📋 Order ID      │ ${this.currentOrderId.padEnd(20)} │
-│ 📅 Date          │ ${new Date().toLocaleDateString().padEnd(20)} │
-│ ⏰ Time          │ ${new Date().toLocaleTimeString().padEnd(20)} │
-│ 📦 Product       │ ${product.name.padEnd(20)} │
-│ 📊 Quantity      │ ${quantityText.padEnd(20)} │
-│ 💰 Price Range   │ ${estimatedPrice.padEnd(20)} │
-└─────────────────────────────────────────┘
+${isModification ? '🔄 *ORDER MODIFICATION REQUEST*' : '🆕 *NEW QUOTATION REQUEST*'}
 
-┌─────────────────────────────────────────┐
-│             PRODUCT FEATURES            │
-├─────────────────────────────────────────┤
-${product.features.map(feature => `│ ✓ ${feature.padEnd(37)} │`).join('\n')}
-└─────────────────────────────────────────┘
+📋 *ORDER REFERENCE:* #${this.currentOrderId}
+📅 *Date:* ${orderDate}
+⏰ *Time:* ${orderTime}
 
-${isModification ? `┌─────────────────────────────────────────┐
-│           ⚠️ MODIFICATION NOTICE          │
-├─────────────────────────────────────────┤
-│ This is an update to existing order     │
-│ with the same reference ID              │
-└─────────────────────────────────────────┘
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 *PRODUCT SPECIFICATION*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-` : ''}┌─────────────────────────────────────────┐
-│            QUOTATION REQUIRED           │
-├─────────────────────────────────────────┤
-│ ✅ Final pricing breakdown              │
-│ ✅ Delivery timeline & shipping cost    │
-│ ✅ Customization options available      │
-│ ✅ Payment terms & conditions           │
-│ ✅ Sample availability & MOQ details    │
-│ ✅ Logo printing specifications         │
-└─────────────────────────────────────────┘
+🛍️ *Product Type:* ${product.name}
+📊 *Required Quantity:* ${quantityText}
+💰 *Estimated Budget:* ${estimatedPrice}
 
-📝 *Additional Requirements:*
-_Please specify any special customization_
-_or delivery requirements below:_
+🌟 *Key Features:*
+${product.features.map(feature => `   ✅ ${feature}`).join('\n')}
 
-┌─────────────────────────────────────────┐
-│                                         │
-│  [Add your specific requirements here]  │
-│                                         │
-└─────────────────────────────────────────┘
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 *QUOTATION REQUIREMENTS*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🏆 *Thank you for considering our services!*
-📧 Generated automatically via SV Bags website
-🌐 Professional non-woven bag solutions
+Please provide comprehensive quote including:
 
-*Awaiting your detailed quotation,*
-*Customer via Website*
-        `.trim();
+💼 *PRICING BREAKDOWN*
+   • Unit price per piece
+   • Volume discount tiers
+   • GST and tax details
+   • Total investment required
+
+📦 *PRODUCTION & DELIVERY*
+   • Manufacturing timeline
+   • Packaging specifications
+   • Shipping costs & methods
+   • Delivery schedule options
+
+🎨 *CUSTOMIZATION OPTIONS*
+   • Logo printing/embossing capabilities
+   • Color customization available
+   • Size variations possible
+   • Special design requirements
+
+📄 *BUSINESS TERMS*
+   • Minimum order quantity (MOQ)
+   • Payment terms & conditions
+   • Sample availability & costs
+   • Warranty/quality guarantees
+
+${isModification ? `
+⚠️ *MODIFICATION NOTICE*
+This is an update to existing order #${this.currentOrderId}
+Previous specifications are being revised as per new requirements.
+
+` : ''}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📞 *CONTACT INFORMATION*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📱 *WhatsApp/Phone:* +91 6302067390
+🌐 *Website Order:* Auto-generated inquiry
+📧 *Response Time:* Within 2-4 business hours
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+*Additional Requirements/Notes:*
+_Please mention any specific customization, delivery preferences, or special requirements in your response._
+
+🙏 *Thank you for choosing Srivenkateshwara Non Woven Bags!*
+💼 *Professional • Reliable • Quality Assured*
+
+*Best regards,*
+*Website Customer*`.trim();
 
         const whatsappUrl = `https://wa.me/916302067390?text=${encodeURIComponent(orderDetails)}`;
         
         // Direct WhatsApp opening - no intermediate button
         this.addBotMessage(
-            "🎉 Perfect! Opening WhatsApp now with your order details...",
+            "🚀 **Excellent!** Preparing your professional quotation request...\n\n📱 Opening WhatsApp with complete order details in **3 seconds**",
             null,
             500
         );
@@ -2092,17 +2140,24 @@ _or delivery requirements below:_
             // Open WhatsApp directly
             window.open(whatsappUrl, '_blank');
             
-            // Show confirmation message
+            // Show professional confirmation message
             this.addBotMessage(
-                `✅ Order ${this.currentOrderId} sent to WhatsApp! Our team will respond within 2 hours with a detailed quote.`,
+                `✅ **Quotation Request #${this.currentOrderId} Successfully Sent!**
+                
+📱 **WhatsApp Status:** Delivered to our sales team
+⏰ **Response Time:** Within 2-4 business hours
+📋 **What's Next:** Our team will review your requirements and send a comprehensive quote
+
+💡 **Pro Tip:** Keep this chat open to track your order status!`,
                 [
-                    { text: "New Quote", value: "new_quote", icon: "fas fa-plus" },
-                    { text: "Track Order", value: "track_order", icon: "fas fa-search" },
-                    { text: "Modify Order", value: "modify_current_order", icon: "fas fa-edit" }
+                    { text: "🆕 Request New Quote", value: "new_quote", icon: "fas fa-plus" },
+                    { text: "📊 Track My Orders", value: "track_order", icon: "fas fa-chart-line" },
+                    { text: "✏️ Modify This Order", value: "modify_current_order", icon: "fas fa-edit" },
+                    { text: "📞 Contact Sales Team", value: "contact_sales", icon: "fas fa-headset" }
                 ],
                 1000
             );
-        }, 1000);
+        }, 3000);
     }
 
     generateOrderId() {
@@ -2274,10 +2329,10 @@ What would you like to modify?`,
     showOrderTracking() {
         if (this.orderHistory.length === 0) {
             this.addBotMessage(
-                "No orders found. Would you like to place a new order?",
+                "📋 No orders found in your history.\n\n🎯 Ready to start your first order?",
                 [
-                    { text: "Get Quote", value: "get_quote", icon: "fas fa-plus" },
-                    { text: "Product Info", value: "product_info", icon: "fas fa-info-circle" }
+                    { text: "Get Quote", value: "get_quote", icon: "fas fa-calculator" },
+                    { text: "Product Catalog", value: "product_info", icon: "fas fa-info-circle" }
                 ],
                 800
             );
@@ -2290,29 +2345,57 @@ What would you like to modify?`,
             orderMap.set(order.id, order);
         });
 
-        let trackingInfo = "📋 *YOUR ORDER HISTORY*\n";
-        trackingInfo += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
-        
+        let trackingInfo = `🏢 **SRIVENKATESHWARA NON WOVEN BAGS**\n`;
+        trackingInfo += `📞 Customer Service: +91 6302067390\n`;
+        trackingInfo += `═══════════════════════════════════\n`;
+        trackingInfo += `📊 **ORDER TRACKING DASHBOARD**\n`;
+        trackingInfo += `═══════════════════════════════════\n\n`;
+
+        let orderCount = 0;
         orderMap.forEach((order, orderId) => {
-            const date = new Date(order.timestamp).toLocaleDateString();
-            const time = new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            orderCount++;
+            const date = new Date(order.timestamp);
+            const formattedDate = date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            const formattedTime = date.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+            });
             
-            trackingInfo += `┌─ *Order #${orderId}*\n`;
-            trackingInfo += `│ 📦  Product     : ${order.product}\n`;
-            trackingInfo += `│ 📊  Quantity    : ${order.quantity}\n`;
-            trackingInfo += `│ 💰  Price Range : ${order.price}\n`;
-            trackingInfo += `│ 📅  Date        : ${date}\n`;
-            trackingInfo += `│ ⏰  Time        : ${time}\n`;
-            trackingInfo += `│ 📌  Status      : ${order.status.toUpperCase()}\n`;
-            trackingInfo += `└─────────────────────────────────\n\n`;
+            const statusIcon = order.status === 'pending' ? '🟡' : 
+                              order.status === 'processing' ? '🔵' :
+                              order.status === 'completed' ? '🟢' : '⚪';
+            
+            trackingInfo += `╭─────────────── ORDER ${orderCount} ───────────────╮\n`;
+            trackingInfo += `│                                          │\n`;
+            trackingInfo += `│  🆔 **Order ID:** #${orderId}${' '.repeat(Math.max(0, 19 - orderId.length))}│\n`;
+            trackingInfo += `│  📦 **Product:** ${order.product}${' '.repeat(Math.max(0, 22 - order.product.length))}│\n`;
+            trackingInfo += `│  📊 **Quantity:** ${order.quantity}${' '.repeat(Math.max(0, 20 - order.quantity.toString().length))}│\n`;
+            trackingInfo += `│  💰 **Estimate:** ${order.price}${' '.repeat(Math.max(0, 20 - order.price.length))}│\n`;
+            trackingInfo += `│  📅 **Ordered:** ${formattedDate}${' '.repeat(Math.max(0, 21 - formattedDate.length))}│\n`;
+            trackingInfo += `│  ⏰ **Time:** ${formattedTime}${' '.repeat(Math.max(0, 24 - formattedTime.length))}│\n`;
+            trackingInfo += `│  ${statusIcon} **Status:** ${order.status.toUpperCase()}${' '.repeat(Math.max(0, 22 - order.status.length))}│\n`;
+            trackingInfo += `│                                          │\n`;
+            trackingInfo += `╰──────────────────────────────────────────╯\n\n`;
         });
+
+        trackingInfo += `📈 **Quick Actions Available:**\n`;
+        trackingInfo += `• Modify existing orders\n`;
+        trackingInfo += `• Request new quotations\n`;
+        trackingInfo += `• Get technical support\n\n`;
+        trackingInfo += `⚡ *Orders updated in real-time*`;
 
         this.addBotMessage(
             trackingInfo,
             [
-                { text: "Modify Current Order", value: "modify_current_order", icon: "fas fa-edit" },
-                { text: "New Quote", value: "new_quote", icon: "fas fa-plus" },
-                { text: "Contact Support", value: "contact_sales", icon: "fas fa-headset" }
+                { text: "📝 Modify Order", value: "modify_current_order", icon: "fas fa-edit" },
+                { text: "🆕 New Quote", value: "new_quote", icon: "fas fa-plus" },
+                { text: "📞 Call Support", value: "contact_sales", icon: "fas fa-headset" }
             ],
             1000
         );
