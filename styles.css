@@ -3375,11 +3375,11 @@ html {
 }
 
 .order-summary-card.premium .detail-section h5 {
-    color: #ffffff;
+    color: #60a5fa;
     font-size: 14px;
     margin: 15px 0 10px 0;
     padding-bottom: 5px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(96, 165, 250, 0.4);
     font-weight: 600;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
@@ -3393,7 +3393,7 @@ html {
 }
 
 .order-summary-card.premium .detail-item .label {
-    color: #f1f5f9;
+    color: #93c5fd;
     font-size: 13px;
     font-weight: 500;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -3420,7 +3420,7 @@ html {
 
 .order-summary-card.premium .feature-item {
     font-size: 13px;
-    color: #f8fafc;
+    color: #bfdbfe;
     padding: 2px 0;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
@@ -3433,13 +3433,13 @@ html {
 
 .order-summary-card.premium .next-steps {
     font-size: 12px;
-    color: #e2e8f0;
+    color: #a5b4fc;
     text-align: center;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .order-summary-card.premium .next-steps strong {
-    color: #ffffff;
+    color: #60a5fa;
     display: block;
     margin-bottom: 5px;
     font-weight: 600;
@@ -3473,6 +3473,70 @@ html {
     50% { 
         box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6); 
         transform: scale(1.02); 
+    }
+}
+
+/* WhatsApp Button Specific Styles */
+.quick-option[data-action="open_whatsapp"] {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important;
+    color: white !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4) !important;
+    animation: whatsappPulse 2s infinite !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+    padding: 12px 20px !important;
+    min-height: 48px !important;
+    /* iOS-friendly touch target */
+    -webkit-tap-highlight-color: rgba(37, 211, 102, 0.3);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.quick-option[data-action="open_whatsapp"]:hover,
+.quick-option[data-action="open_whatsapp"]:focus {
+    transform: translateY(-2px) scale(1.05) !important;
+    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.6) !important;
+}
+
+.quick-option[data-action="open_whatsapp"]:active {
+    transform: translateY(0) scale(0.98) !important;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4) !important;
+}
+
+@keyframes whatsappPulse {
+    0%, 100% { 
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4); 
+        transform: scale(1); 
+    }
+    50% { 
+        box-shadow: 0 8px 25px rgba(37, 211, 102, 0.6); 
+        transform: scale(1.03); 
+    }
+}
+
+/* Copy Message Button */
+.quick-option[data-action="copy_message"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
+    font-weight: 600 !important;
+    min-height: 48px !important;
+    /* iOS-friendly touch target */
+    -webkit-tap-highlight-color: rgba(102, 126, 234, 0.3);
+    -webkit-touch-callout: none;
+}
+
+/* Ensure mobile compatibility */
+@media (max-width: 768px) {
+    .quick-option[data-action="open_whatsapp"],
+    .quick-option[data-action="copy_message"] {
+        min-height: 44px !important;
+        font-size: 15px !important;
+        padding: 10px 16px !important;
+        margin: 4px 0 !important;
     }
 }
 

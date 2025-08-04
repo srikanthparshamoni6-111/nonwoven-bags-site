@@ -978,6 +978,8 @@ class ChatbotAssistant {
         this.orderHistory = []; // Store order history
         this.hasAutoPopped = false; // Track if auto-popup has occurred
         this.isDragging = false; // Track dragging state
+        this.currentWhatsAppUrl = null; // Store current WhatsApp URL for iOS compatibility
+        this.currentOrderDetails = null; // Store current order details for copying
         this.init();
     }
 
@@ -1764,6 +1766,49 @@ class ChatbotAssistant {
                 }
                 break;
                 
+            case 'open_whatsapp':
+                this.openWhatsAppDirectly();
+                break;
+                
+            case 'copy_message':
+                this.copyOrderMessage();
+                break;
+                
+            case 'open_whatsapp_manual':
+                // Try to open WhatsApp contact page
+                const whatsappContact = 'https://wa.me/916302067390';
+                window.open(whatsappContact, '_blank');
+                this.addBotMessage(
+                    "📱 **WhatsApp opened!** Now paste your copied message and send it.",
+                    [
+                        { text: "📋 Copy Message Again", value: "copy_message", icon: "fas fa-copy" },
+                        { text: "🆕 New Quote", value: "new_quote", icon: "fas fa-plus" }
+                    ],
+                    800
+                );
+                break;
+                
+            case 'contact_sales':
+                this.showContactInfo();
+                break;
+                
+            case 'new_quote':
+                this.resetConversation();
+                break;
+                
+            case 'modify_order':
+            case 'modify_current_order':
+                this.modifyCurrentOrder();
+                break;
+                
+            case 'track_order':
+                this.showOrderTracking();
+                break;
+                
+            case 'restart':
+                this.resetConversation();
+                break;
+                
             default:
                 this.addBotMessage(
                     "I'm sorry, I didn't understand that. Let me help you with:",
@@ -2037,93 +2082,103 @@ class ChatbotAssistant {
         // Determine if this is a modification
         const isModification = this.orderHistory.filter(order => order.id === this.currentOrderId).length > 1;
         
+        // Create professional date formatting
+        const now = new Date();
+        const orderDate = now.toLocaleDateString('en-US', { 
+            month: 'long', 
+            day: 'numeric',
+            year: 'numeric'
+        });
+        const orderTime = now.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+        });
+
         const orderDetails = `Hello! 👋
 
-I'm interested in getting a quote for non-woven bags from your company.
+I'm interested in getting a quotation for non-woven bags from your company.
 
 🏢 *SRIVENKATESHWARA NON WOVEN BAGS*
 📞 Contact: +91 6302067390
 
 ${isModification ? '🔄 *ORDER MODIFICATION REQUEST*' : '🆕 *QUOTATION REQUEST*'}
-Order Reference: *#${this.currentOrderId}*
 
-📦 *PRODUCT DETAILS:*
-• Product: ${product.name}
-• Quantity: ${quantityText}
-• Budget Range: ${estimatedPrice}
+📋 *Order Reference:* #${this.currentOrderId}
+📅 *Date:* ${orderDate}
+⏰ *Time:* ${orderTime}
 
-🌟 *Key Features Required:*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 *PRODUCT REQUIREMENTS:*
+
+🛍️ *Product Type:* ${product.name}
+📊 *Required Quantity:* ${quantityText}
+💰 *Budget Range:* ${estimatedPrice}
+
+🌟 *Key Features Needed:*
 ${product.features.map(feature => `• ${feature}`).join('\n')}
 
-💼 *PLEASE PROVIDE QUOTE FOR:*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-*Pricing:*
-• Unit price per piece
-• Volume discounts available
-• GST and total cost breakdown
+💼 *QUOTATION DETAILS NEEDED:*
 
-*Production & Delivery:*
+📊 *Pricing Information:*
+• Price per piece (unit cost)
+• Volume discounts for bulk orders
+• GST breakdown and total cost
+• Payment terms and conditions
+
+📦 *Production & Logistics:*
 • Manufacturing timeline
+• Quality specifications
 • Packaging details
-• Shipping options and costs
+• Shipping options and delivery costs
 
-*Customization:*
-• Logo printing/embossing options
-• Color and size variations
-• Design customization capabilities
-
-*Business Terms:*
-• Minimum order quantity
-• Payment terms
-• Sample availability
-• Quality guarantees
+🎨 *Customization Options:*
+• Logo printing/embossing capabilities
+• Available colors and size options
+• Design customization possibilities
+• Minimum order quantities
 
 ${isModification ? `
-⚠️ *NOTE:* This is a modification to my previous order #${this.currentOrderId}. Please update the specifications accordingly.
+⚠️ *MODIFICATION NOTE:*
+This is an update to my previous order #${this.currentOrderId}. Please revise the previous specifications with these new requirements.
 
-` : ''}📱 *Response Expected:* Within 2-4 business hours
+` : ''}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-*Additional Requirements:*
-Please let me know if you need any specific details about customization, delivery location, or special requirements.
+📱 *Expected Response:* Within 2-4 business hours
+📧 *Contact Method:* WhatsApp preferred
 
-Thank you for your time and looking forward to your detailed quotation!
+*Additional Notes:*
+Please include any specific details about sample availability, bulk pricing tiers, and delivery options to my location.
+
+Looking forward to your comprehensive quotation!
 
 Best regards,
 Customer via Website
 
-🌐 Auto-generated from SV Bags website`.trim();
+🌐 Generated from SV Bags official website`.trim();
 
         const whatsappUrl = `https://wa.me/916302067390?text=${encodeURIComponent(orderDetails)}`;
         
-        // Direct WhatsApp opening - no intermediate button
+        // Store for iOS compatibility
+        this.currentWhatsAppUrl = whatsappUrl;
+        this.currentOrderDetails = orderDetails;
+        
+        // iOS-compatible WhatsApp opening
         this.addBotMessage(
-            "🚀 **Excellent!** Preparing your professional quotation request...\n\n📱 Opening WhatsApp with complete order details in **3 seconds**",
-            null,
+            "🚀 **Perfect!** Your quotation request is ready.\n\n📱 **Click the button below to send via WhatsApp:**",
+            [
+                { 
+                    text: "📱 Send to WhatsApp", 
+                    value: "open_whatsapp", 
+                    icon: "fab fa-whatsapp"
+                },
+                { text: "📋 Copy Message", value: "copy_message", icon: "fas fa-copy" }
+            ],
             500
         );
-
-        setTimeout(() => {
-            // Open WhatsApp directly
-            window.open(whatsappUrl, '_blank');
-            
-            // Show professional confirmation message
-            this.addBotMessage(
-                `✅ **Quotation Request #${this.currentOrderId} Successfully Sent!**
-                
-📱 **WhatsApp Status:** Delivered to our sales team
-⏰ **Response Time:** Within 2-4 business hours
-📋 **What's Next:** Our team will review your requirements and send a comprehensive quote
-
-💡 **Pro Tip:** Keep this chat open to track your order status!`,
-                [
-                    { text: "🆕 Request New Quote", value: "new_quote", icon: "fas fa-plus" },
-                    { text: "📊 Track My Orders", value: "track_order", icon: "fas fa-chart-line" },
-                    { text: "✏️ Modify This Order", value: "modify_current_order", icon: "fas fa-edit" },
-                    { text: "📞 Contact Sales Team", value: "contact_sales", icon: "fas fa-headset" }
-                ],
-                1000
-            );
-        }, 3000);
     }
 
     generateOrderId() {
@@ -2312,20 +2367,18 @@ What would you like to modify?`,
         });
 
         let trackingInfo = `🏢 **SRIVENKATESHWARA NON WOVEN BAGS**\n`;
-        trackingInfo += `📞 Customer Service: +91 6302067390\n`;
-        trackingInfo += `═══════════════════════════════════\n`;
-        trackingInfo += `📊 **ORDER TRACKING DASHBOARD**\n`;
-        trackingInfo += `═══════════════════════════════════\n\n`;
+        trackingInfo += `📱 Customer Service: +91 6302067390\n`;
+        trackingInfo += `\n📊 **YOUR ORDER HISTORY**\n`;
+        trackingInfo += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
         let orderCount = 0;
         orderMap.forEach((order, orderId) => {
             orderCount++;
             const date = new Date(order.timestamp);
             const formattedDate = date.toLocaleDateString('en-US', { 
-                weekday: 'short', 
-                year: 'numeric', 
                 month: 'short', 
-                day: 'numeric' 
+                day: 'numeric',
+                year: 'numeric'
             });
             const formattedTime = date.toLocaleTimeString('en-US', { 
                 hour: '2-digit', 
@@ -2337,24 +2390,20 @@ What would you like to modify?`,
                               order.status === 'processing' ? '🔵' :
                               order.status === 'completed' ? '🟢' : '⚪';
             
-            trackingInfo += `╭─────────────── ORDER ${orderCount} ───────────────╮\n`;
-            trackingInfo += `│                                          │\n`;
-            trackingInfo += `│  🆔 **Order ID:** #${orderId}${' '.repeat(Math.max(0, 19 - orderId.length))}│\n`;
-            trackingInfo += `│  📦 **Product:** ${order.product}${' '.repeat(Math.max(0, 22 - order.product.length))}│\n`;
-            trackingInfo += `│  📊 **Quantity:** ${order.quantity}${' '.repeat(Math.max(0, 20 - order.quantity.toString().length))}│\n`;
-            trackingInfo += `│  💰 **Estimate:** ${order.price}${' '.repeat(Math.max(0, 20 - order.price.length))}│\n`;
-            trackingInfo += `│  📅 **Ordered:** ${formattedDate}${' '.repeat(Math.max(0, 21 - formattedDate.length))}│\n`;
-            trackingInfo += `│  ⏰ **Time:** ${formattedTime}${' '.repeat(Math.max(0, 24 - formattedTime.length))}│\n`;
-            trackingInfo += `│  ${statusIcon} **Status:** ${order.status.toUpperCase()}${' '.repeat(Math.max(0, 22 - order.status.length))}│\n`;
-            trackingInfo += `│                                          │\n`;
-            trackingInfo += `╰──────────────────────────────────────────╯\n\n`;
+            trackingInfo += `**ORDER #${orderId}** ${statusIcon}\n`;
+            trackingInfo += `📦 Product: ${order.product}\n`;
+            trackingInfo += `📊 Quantity: ${order.quantity}\n`;
+            trackingInfo += `💰 Price Range: ${order.price}\n`;
+            trackingInfo += `📅 Date: ${formattedDate} at ${formattedTime}\n`;
+            trackingInfo += `📌 Status: **${order.status.toUpperCase()}**\n`;
+            trackingInfo += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
         });
 
-        trackingInfo += `📈 **Quick Actions Available:**\n`;
-        trackingInfo += `• Modify existing orders\n`;
-        trackingInfo += `• Request new quotations\n`;
-        trackingInfo += `• Get technical support\n\n`;
-        trackingInfo += `⚡ *Orders updated in real-time*`;
+        trackingInfo += `💡 **Available Actions:**\n`;
+        trackingInfo += `• Modify any existing order\n`;
+        trackingInfo += `• Request fresh quotations\n`;
+        trackingInfo += `• Contact our support team\n\n`;
+        trackingInfo += `🔄 *Live updates • Real-time tracking*`;
 
         this.addBotMessage(
             trackingInfo,
@@ -2365,6 +2414,91 @@ What would you like to modify?`,
             ],
             1000
         );
+    }
+
+    openWhatsAppDirectly() {
+        if (this.currentWhatsAppUrl) {
+            // Try to open WhatsApp directly - this works better on iOS when called synchronously
+            const opened = window.open(this.currentWhatsAppUrl, '_blank');
+            
+            // Check if popup was blocked
+            if (!opened || opened.closed || typeof opened.closed == 'undefined') {
+                // Fallback: show copy message option
+                this.addBotMessage(
+                    "📱 **WhatsApp couldn't open automatically.**\n\nPlease copy the message and paste it in WhatsApp:",
+                    [
+                        { text: "📋 Copy Message", value: "copy_message", icon: "fas fa-copy" },
+                        { text: "🔄 Try Again", value: "open_whatsapp", icon: "fab fa-whatsapp" }
+                    ],
+                    500
+                );
+            } else {
+                // Success message
+                this.addBotMessage(
+                    `✅ **Quotation Request #${this.currentOrderId} Sent!**
+                    
+📱 **WhatsApp Status:** Opened successfully
+⏰ **Response Time:** Within 2-4 business hours
+📋 **What's Next:** Our team will review and send a comprehensive quote
+
+💡 **Pro Tip:** Keep this chat open to track your order!`,
+                    [
+                        { text: "🆕 New Quote", value: "new_quote", icon: "fas fa-plus" },
+                        { text: "📊 Track Orders", value: "track_order", icon: "fas fa-chart-line" },
+                        { text: "✏️ Modify Order", value: "modify_current_order", icon: "fas fa-edit" },
+                        { text: "📞 Contact Support", value: "contact_sales", icon: "fas fa-headset" }
+                    ],
+                    1000
+                );
+            }
+        } else {
+            this.addBotMessage(
+                "Sorry, there was an issue. Please try generating a new quote.",
+                [{ text: "🆕 New Quote", value: "new_quote", icon: "fas fa-plus" }],
+                500
+            );
+        }
+    }
+    
+    copyOrderMessage() {
+        if (this.currentOrderDetails) {
+            // Try to copy to clipboard
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(this.currentOrderDetails).then(() => {
+                    this.addBotMessage(
+                        "✅ **Message copied to clipboard!**\n\n📱 Now paste it in WhatsApp:\n1. Open WhatsApp\n2. Search for +91 6302067390\n3. Paste the message\n4. Send!",
+                        [
+                            { text: "📱 Open WhatsApp", value: "open_whatsapp_manual", icon: "fab fa-whatsapp" },
+                            { text: "🆕 New Quote", value: "new_quote", icon: "fas fa-plus" }
+                        ],
+                        800
+                    );
+                }).catch(() => {
+                    this.showManualCopy();
+                });
+            } else {
+                this.showManualCopy();
+            }
+        }
+    }
+    
+    showManualCopy() {
+        this.addBotMessage(
+            "📋 **Copy this message manually:**",
+            null,
+            500
+        );
+        
+        setTimeout(() => {
+            this.addBotMessage(
+                this.currentOrderDetails,
+                [
+                    { text: "📱 Open WhatsApp", value: "open_whatsapp_manual", icon: "fab fa-whatsapp" },
+                    { text: "🆕 New Quote", value: "new_quote", icon: "fas fa-plus" }
+                ],
+                1000
+            );
+        }, 800);
     }
 
     escapeHtml(text) {
