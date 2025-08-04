@@ -6,7 +6,7 @@
     <title>Srivenkateshwara NON Woven Bags - Premium Manufacturing Since Excellence</title>
     <meta name="description" content="Premium non-woven bag manufacturing in Kottur Shadnagar. Eco-friendly, customizable, and durable packaging solutions for all industries. Fast delivery across India.">
     <meta name="keywords" content="non-woven bags, eco-friendly bags, custom bags, packaging solutions, Telangana manufacturing">
-    <link rel="stylesheet" href="styles.css?v=50">
+    <link rel="stylesheet" href="styles.css?v=27">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
@@ -433,6 +433,10 @@
                                 <i class="fas fa-phone"></i>
                                 <span>Call: +91 6302067390</span>
                             </a>
+                            <a href="https://wa.me/916302067390?text=Hi%20I%20need%20help%20with%20my%20order" class="support-btn whatsapp">
+                                <i class="fab fa-whatsapp"></i>
+                                <span>WhatsApp Support</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -740,7 +744,7 @@
 
     <!-- Scripts -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="script.js?v=18"></script>
+    <script src="script.js?v=14"></script>
     <script>
         // Initialize AOS (Animate On Scroll)
         AOS.init({
@@ -762,12 +766,13 @@
     </script>
     <!-- Chatbot Widget -->
     <div id="chatbot-widget">
-        <!-- Floating Chatbot Icon (shows when minimized/closed) -->
-        <div id="chatbot-floating-icon" class="chatbot-floating-icon" style="display: none;">
-            <i class="fas fa-robot"></i>
+        <div id="chatbot-button" class="chatbot-button">
+            <i class="fas fa-comments"></i>
+            <span class="chatbot-text">Chat with us</span>
+            <div class="chatbot-notification" id="chatbot-notification">1</div>
         </div>
         
-        <div id="chatbot-container" class="chatbot-container chatbot-auto-open">
+        <div id="chatbot-container" class="chatbot-container">
             <div class="chatbot-header">
                 <div class="chatbot-header-info">
                     <div class="chatbot-avatar">
@@ -778,14 +783,9 @@
                         <span class="chatbot-status">Online • Typically replies instantly</span>
                     </div>
                 </div>
-                <div class="chatbot-controls">
-                    <button id="chatbot-minimize" class="chatbot-minimize">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                    <button id="chatbot-close" class="chatbot-close">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+                <button id="chatbot-close" class="chatbot-close">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             
             <div class="chatbot-messages" id="chatbot-messages">

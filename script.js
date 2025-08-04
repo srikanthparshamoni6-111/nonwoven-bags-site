@@ -973,48 +973,28 @@ class ChatbotAssistant {
         this.userData = {};
         this.conversationFlow = {};
         this.isProcessing = false; // Prevent rapid multiple messages
-        this.orderGenerated = false; // Track if WhatsApp order was already generated
-        this.currentOrderId = null; // Track current order for modifications
-        this.isModifying = false; // Track if we're modifying an existing order
         this.init();
     }
 
     init() {
         this.bindEvents();
         this.setupConversationFlow();
-        // Auto-open chatbot after page loads
+        // Show notification after 3 seconds
         setTimeout(() => {
-            this.openChatbot();
-        }, 1500);
+            this.showNotification();
+        }, 3000);
     }
 
     bindEvents() {
+        // Toggle chatbot
+        document.getElementById('chatbot-button')?.addEventListener('click', () => {
+            this.toggleChatbot();
+        });
+
         // Close chatbot
         document.getElementById('chatbot-close')?.addEventListener('click', () => {
             this.closeChatbot();
         });
-
-        // Minimize chatbot
-        document.getElementById('chatbot-minimize')?.addEventListener('click', () => {
-            this.minimizeChatbot();
-        });
-
-        // Restore chatbot when clicking on minimized header
-        document.querySelector('.chatbot-header')?.addEventListener('click', (e) => {
-            const container = document.getElementById('chatbot-container');
-            if (container && container.classList.contains('minimized') && 
-                !e.target.closest('.chatbot-controls')) {
-                this.restoreChatbot();
-            }
-        });
-
-        // Floating icon click to restore chatbot
-        document.getElementById('chatbot-floating-icon')?.addEventListener('click', () => {
-            this.restoreChatbot();
-        });
-
-        // Make floating icon draggable
-        this.makeDraggable();
 
         // Send message
         document.getElementById('chatbot-send')?.addEventListener('click', () => {
@@ -1050,11 +1030,6 @@ class ChatbotAssistant {
                     this.handleQuickOption('get_quote');
                 } else if (action === 'modify_order') {
                     this.modifyCurrentOrder();
-                } else if (action === 'get_quote' && this.isModifying) {
-                    // Handle product type change during modification
-                    this.isModifying = true;
-                    this.orderGenerated = false;
-                    this.handleQuickOption(action);
                 } else {
                     this.handleQuickOption(action);
                 }
@@ -1225,126 +1200,16 @@ class ChatbotAssistant {
 
     closeChatbot() {
         const container = document.getElementById('chatbot-container');
-        const floatingIcon = document.getElementById('chatbot-floating-icon');
         if (container) {
             container.classList.remove('active');
-            container.classList.remove('chatbot-auto-open');
-            container.style.display = 'none';
             this.isOpen = false;
         }
-        if (floatingIcon) {
-            floatingIcon.style.display = 'flex';
-        }
     }
 
-    minimizeChatbot() {
-        const container = document.getElementById('chatbot-container');
-        const floatingIcon = document.getElementById('chatbot-floating-icon');
-        if (container) {
-            container.classList.add('minimized');
-            container.style.display = 'none';
-            this.isOpen = false;
-        }
-        if (floatingIcon) {
-            floatingIcon.style.display = 'flex';
-        }
-    }
-
-    restoreChatbot() {
-        const container = document.getElementById('chatbot-container');
-        const floatingIcon = document.getElementById('chatbot-floating-icon');
-        if (container) {
-            container.classList.remove('minimized');
-            container.style.display = 'flex';
-            this.isOpen = true;
-            // Focus on input field
-            setTimeout(() => {
-                document.getElementById('chatbot-input-field')?.focus();
-            }, 300);
-        }
-        if (floatingIcon) {
-            floatingIcon.style.display = 'none';
-        }
-    }
-
-    makeDraggable() {
-        const floatingIcon = document.getElementById('chatbot-floating-icon');
-        if (!floatingIcon) return;
-
-        let isDragging = false;
-        let currentX = 0;
-        let currentY = 0;
-        let initialX = 0;
-        let initialY = 0;
-        let xOffset = 0;
-        let yOffset = 0;
-
-        floatingIcon.addEventListener('mousedown', dragStart);
-        floatingIcon.addEventListener('touchstart', dragStart);
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('touchmove', drag);
-        document.addEventListener('mouseup', dragEnd);
-        document.addEventListener('touchend', dragEnd);
-
-        function dragStart(e) {
-            if (e.type === 'touchstart') {
-                initialX = e.touches[0].clientX - xOffset;
-                initialY = e.touches[0].clientY - yOffset;
-            } else {
-                initialX = e.clientX - xOffset;
-                initialY = e.clientY - yOffset;
-            }
-
-            if (e.target === floatingIcon || e.target.parentNode === floatingIcon) {
-                isDragging = true;
-                floatingIcon.classList.add('dragging');
-            }
-        }
-
-        function drag(e) {
-            if (isDragging) {
-                e.preventDefault();
-                
-                if (e.type === 'touchmove') {
-                    currentX = e.touches[0].clientX - initialX;
-                    currentY = e.touches[0].clientY - initialY;
-                } else {
-                    currentX = e.clientX - initialX;
-                    currentY = e.clientY - initialY;
-                }
-
-                xOffset = currentX;
-                yOffset = currentY;
-
-                // Constrain to viewport
-                const rect = floatingIcon.getBoundingClientRect();
-                const maxX = window.innerWidth - rect.width;
-                const maxY = window.innerHeight - rect.height;
-
-                xOffset = Math.max(0, Math.min(xOffset, maxX));
-                yOffset = Math.max(0, Math.min(yOffset, maxY));
-
-                floatingIcon.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
-            }
-        }
-
-        function dragEnd(e) {
-            if (isDragging) {
-                isDragging = false;
-                floatingIcon.classList.remove('dragging');
-                
-                // Snap to edges if close
-                const rect = floatingIcon.getBoundingClientRect();
-                const snapDistance = 50;
-                
-                if (rect.left < snapDistance) {
-                    xOffset = -rect.left + 20;
-                    floatingIcon.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
-                } else if (rect.right > window.innerWidth - snapDistance) {
-                    xOffset = window.innerWidth - rect.width - 20;
-                    floatingIcon.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
-                }
-            }
+    showNotification() {
+        const notification = document.getElementById('chatbot-notification');
+        if (notification && !this.isOpen) {
+            notification.style.display = 'flex';
         }
     }
 
@@ -1500,8 +1365,6 @@ class ChatbotAssistant {
                 
             case 'modify_quantity':
                 if (this.userData.bagType) {
-                    this.isModifying = true;
-                    this.orderGenerated = false;
                     this.askForQuantity(this.userData.bagType);
                 } else {
                     this.addBotMessage(
@@ -1513,7 +1376,7 @@ class ChatbotAssistant {
                 
             case 'confirm_order':
                 if (this.userData.bagType && this.userData.quantity) {
-                    this.directWhatsAppOrder(this.userData.bagType);
+                    this.generateWhatsAppOrder(this.userData.bagType);
                 } else {
                     this.addBotMessage(
                         "Sorry, there seems to be missing information. Let's start over:",
@@ -1579,19 +1442,11 @@ class ChatbotAssistant {
             quantityText = this.userData.customQuantity || 'Custom quantity';
         }
         
-        // Set or keep the current order ID
-        if (!this.currentOrderId || !this.isModifying) {
-            this.currentOrderId = Date.now().toString().slice(-6);
-        }
-        
-        let message;
-        if (this.isModifying) {
-            message = "✅ Order updated! Here's your revised summary:";
-        } else {
-            message = "🎉 Perfect! I've prepared your order summary:";
-        }
-        
-        this.addBotMessage(message, null, 800);
+        this.addBotMessage(
+            "🎉 Perfect! I've prepared your order summary:",
+            null,
+            800
+        );
 
         setTimeout(() => {
             this.showOrderSummaryCard(product, quantityText, quantity);
@@ -1616,7 +1471,7 @@ class ChatbotAssistant {
                     <div class="order-info">
                         <h4>${product.name}</h4>
                         <div class="order-meta">
-                            <span class="order-id">#${this.currentOrderId}</span>
+                            <span class="order-id">#${Date.now().toString().slice(-6)}</span>
                             <span class="price-badge">${estimatedPrice}</span>
                         </div>
                     </div>
@@ -1635,7 +1490,7 @@ class ChatbotAssistant {
                 
                 <div class="order-actions">
                     <button class="quick-option primary-action" data-action="confirm_order">
-                        <i class="fab fa-whatsapp"></i> Send to WhatsApp
+                        <i class="fab fa-whatsapp"></i> Send Order
                     </button>
                     <button class="quick-option secondary-action" data-action="modify_order">
                         <i class="fas fa-edit"></i> Edit
@@ -1730,17 +1585,11 @@ class ChatbotAssistant {
         const product = this.productDetails[bagType];
         this.userData.bagType = bagType;
         
-        // Reset order generation state for new/modified orders
-        this.orderGenerated = false;
-        
-        let message;
-        if (this.isModifying) {
-            message = `Updated! Now selecting ${product.name}. Let's update your quantity.`;
-        } else {
-            message = `Great choice! ${product.name} are excellent for your needs.`;
-        }
-        
-        this.addBotMessage(message, null, 800);
+        this.addBotMessage(
+            `Great choice! ${product.name} are excellent for your needs.`,
+            null,
+            800
+        );
 
         setTimeout(() => {
             this.askForQuantity(bagType);
@@ -1750,15 +1599,8 @@ class ChatbotAssistant {
     askForQuantity(bagType) {
         const product = this.productDetails[bagType];
         
-        let message;
-        if (this.isModifying) {
-            message = `What's the new quantity for ${product.name}?`;
-        } else {
-            message = `How many ${product.name} do you need? This helps us provide accurate pricing:`;
-        }
-        
         this.addBotMessage(
-            message,
+            `How many ${product.name} do you need? This helps us provide accurate pricing:`,
             [
                 { text: "100 - 500 pcs", value: "100-500" },
                 { text: "500 - 1,000 pcs", value: "500-1000" },
@@ -1773,117 +1615,7 @@ class ChatbotAssistant {
         this.currentStep = 'quantity_selection';
     }
 
-    directWhatsAppOrder(bagType) {
-        // Prevent multiple WhatsApp order generations
-        if (this.orderGenerated) {
-            this.addBotMessage(
-                "⚠️ Order already sent to WhatsApp! You can modify your order or contact sales directly.",
-                [
-                    { text: "Modify Order", value: "modify_order" },
-                    { text: "Contact Sales", value: "contact_sales" },
-                    { text: "New Quote", value: "new_quote" }
-                ],
-                600
-            );
-            return;
-        }
-        
-        const product = this.productDetails[bagType];
-        let quantityText = this.userData.quantity || 'To be discussed';
-        
-        // Format quantity for display
-        if (this.userData.quantity === 'custom-quantity' && this.userData.customQuantity) {
-            quantityText = this.userData.customQuantity;
-        } else if (this.userData.quantity && this.userData.quantity !== 'unsure') {
-            quantityText = `${this.userData.quantity} pieces`;
-        } else if (this.userData.quantity === 'unsure') {
-            quantityText = 'Quantity to be discussed';
-        }
-        
-        const estimatedPrice = this.getEstimatedPrice(this.userData.quantity);
-        
-        // Add modification status to order details
-        const orderType = this.isModifying ? 'MODIFIED ORDER' : 'NEW ORDER';
-        const orderDetails = `
-Hi Srivenkateshwara NON Woven Bags,
-
-${orderType} - Order #${this.currentOrderId}
-
-I'm interested in placing an order through your website chatbot:
-
-📦 Product Type: ${product.name}
-📊 Quantity Needed: ${quantityText}
-💰 Expected Price Range: ${estimatedPrice}
-📋 Product Features: ${product.features.join(', ')}
-
-Please provide me with:
-✅ Detailed quote with exact pricing
-✅ Delivery timeline and shipping cost
-✅ Customization options (logo printing, colors)
-✅ Payment terms and methods
-✅ Sample availability
-
-Additional Requirements: [Please specify any special requirements]
-
-Thank you for your quick response!
-        `.trim();
-
-        const whatsappUrl = `https://wa.me/916302067390?text=${encodeURIComponent(orderDetails)}`;
-        
-        // Directly open WhatsApp
-        try {
-            window.open(whatsappUrl, '_blank');
-            
-            // Show success message
-            let successMessage;
-            if (this.isModifying) {
-                successMessage = "✅ Modified order sent to WhatsApp! Our team will respond with updated pricing soon.";
-            } else {
-                successMessage = "🎉 Order sent to WhatsApp successfully! Our team typically responds within 2 hours.";
-            }
-            
-            this.addBotMessage(
-                successMessage,
-                [
-                    { text: "New Quote", value: "new_quote" },
-                    { text: "Contact Sales", value: "contact_sales" },
-                    { text: "Modify This Order", value: "modify_order" }
-                ],
-                800
-            );
-            
-            // Mark order as generated and reset modification state
-            this.orderGenerated = true;
-            this.isModifying = false;
-            
-        } catch (error) {
-            console.error('Error opening WhatsApp:', error);
-            this.addBotMessage(
-                "❌ Unable to open WhatsApp automatically. You can copy this number and contact us directly: +91 6302067390",
-                [
-                    { text: "Try Again", value: "confirm_order" },
-                    { text: "Contact Sales", value: "contact_sales" }
-                ],
-                600
-            );
-        }
-    }
-
     generateWhatsAppOrder(bagType) {
-        // Prevent multiple WhatsApp order generations
-        if (this.orderGenerated) {
-            this.addBotMessage(
-                "⚠️ Order already generated! You can modify your order above or contact sales directly.",
-                [
-                    { text: "Modify Order", value: "modify_order" },
-                    { text: "Contact Sales", value: "contact_sales" },
-                    { text: "New Quote", value: "new_quote" }
-                ],
-                600
-            );
-            return;
-        }
-        
         const product = this.productDetails[bagType];
         let quantityText = this.userData.quantity || 'To be discussed';
         
@@ -1898,12 +1630,8 @@ Thank you for your quick response!
         
         const estimatedPrice = this.getEstimatedPrice(this.userData.quantity);
         
-        // Add modification status to order details
-        const orderType = this.isModifying ? 'MODIFIED ORDER' : 'NEW ORDER';
         const orderDetails = `
 Hi Srivenkateshwara NON Woven Bags,
-
-${orderType} - Order #${this.currentOrderId}
 
 I'm interested in placing an order through your website chatbot:
 
@@ -1933,14 +1661,11 @@ Thank you for your quick response!
             </button>
         `;
 
-        let message;
-        if (this.isModifying) {
-            message = "✅ Modified order details ready! Click below to send your updated requirements:";
-        } else {
-            message = "🎉 Your order details are ready! Click the button below to send this directly to our WhatsApp:";
-        }
-
-        this.addBotMessage(message, null, 500);
+        this.addBotMessage(
+            "🎉 Your order details are ready! Click the button below to send this directly to our WhatsApp for immediate processing:",
+            null,
+            500
+        );
 
         setTimeout(() => {
             const messagesContainer = document.getElementById('chatbot-messages');
@@ -1967,10 +1692,6 @@ Thank you for your quick response!
                 messagesContainer.appendChild(whatsappElement);
                 this.scrollToBottom();
             }
-            
-            // Mark order as generated and reset modification state
-            this.orderGenerated = true;
-            this.isModifying = false;
         }, 1000);
     }
 
@@ -2091,9 +1812,6 @@ Thank you for your quick response!
         this.userData = {};
         this.currentStep = 'initial';
         this.isProcessing = false;
-        this.orderGenerated = false;
-        this.currentOrderId = null;
-        this.isModifying = false;
         
         this.addBotMessage(
             "🔄 Starting fresh! What would you like to know about our non-woven bags?",
@@ -2109,12 +1827,8 @@ Thank you for your quick response!
     modifyCurrentOrder() {
         const product = this.productDetails[this.userData.bagType];
         
-        // Set modification state
-        this.isModifying = true;
-        this.orderGenerated = false; // Allow regeneration for modifications
-        
         this.addBotMessage(
-            `Current order: ${product?.name || 'No product selected'}
+            `Current selection: ${product?.name || 'No product selected'}
             
 What would you like to modify?`,
             [
