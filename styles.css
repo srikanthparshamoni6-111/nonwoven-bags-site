@@ -3602,23 +3602,21 @@ html {
 
 
 
-/* Global rule to hide phone number text on all floating phone buttons */
-.phone-btn span,
-[href^="tel:"] span,
-a[href^="tel:"] span,
-.phone-btn .support-btn span,
-.support-btn span,
-.quick-contact-btn span,
-.quick-contact-btn .quick-subtitle,
-.quick-contact-btn .quick-title,
-.quick-contact-btn div,
-a[href*="tel:"] span,
-a[href*="tel:"] .quick-subtitle,
-a[href*="tel:"] .quick-title,
-a[href*="tel:"] div,
-a[class*="support-btn"] span,
-a[class*="quick-contact-btn"] span,
-a[class*="quick-contact-btn"] div {
+/* ONLY hide text on FLOATING phone icons - be very specific */
+/* Target fixed positioned phone links (the floating sidebar icons) */
+.footer [href^="tel:"][style*="position: fixed"] span,
+.footer [href^="tel:"][style*="position: fixed"] div,
+.contact [href^="tel:"][style*="position: fixed"] span,
+.contact [href^="tel:"][style*="position: fixed"] div,
+.floating-phone-btn span,
+a[href^="tel:"].floating-action span,
+a[href^="tel:"][class*="floating"] span,
+/* Specifically target any floating positioned phone elements */
+[href^="tel:"][style*="position: fixed"]:not(.quick-contact [href^="tel:"]):not(.footer-section [href^="tel:"]) span,
+[href^="tel:"][style*="position: fixed"]:not(.quick-contact [href^="tel:"]):not(.footer-section [href^="tel:"]) div,
+/* iOS specific targeting */
+body [href^="tel:"][style*="position: fixed"][style*="bottom:"][style*="right:"] span,
+body [href^="tel:"][style*="position: fixed"][style*="bottom:"][style*="right:"] div {
     display: none !important;
 }
 
@@ -3705,25 +3703,17 @@ a[href^="tel:"] i {
         right: 15px !important; /* Arrow at bottom */
     }
     
-    /* Hide all text on floating icons */
-    .social-link span,
-    .btn-whatsapp span,
-    .floating-action-btn span,
-    .phone-btn span,
-    [href^="tel:"] span,
-    a[href^="tel:"] span,
-    .support-btn span,
-    .quick-contact-btn span,
-    .quick-contact-btn .quick-subtitle,
-    .quick-contact-btn .quick-title,
-    .quick-contact-btn div,
-    a[href*="tel:"] span,
-    a[href*="tel:"] .quick-subtitle,
-    a[href*="tel:"] .quick-title,
-    a[href*="tel:"] div,
-    a[class*="support-btn"] span,
-    a[class*="quick-contact-btn"] span,
-    a[class*="quick-contact-btn"] div {
+    /* ONLY hide text on FLOATING sidebar icons - precise targeting */
+    /* Target phone icons in specific positions (not content areas) */
+    .footer [href^="tel:"]:not(.footer-section [href^="tel:"]):not(.quick-contact [href^="tel:"]) span,
+    .footer [href^="tel:"]:not(.footer-section [href^="tel:"]):not(.quick-contact [href^="tel:"]) div,
+    .contact [href^="tel:"]:not(.footer-section [href^="tel:"]):not(.quick-contact [href^="tel:"]) span, 
+    .contact [href^="tel:"]:not(.footer-section [href^="tel:"]):not(.quick-contact [href^="tel:"]) div,
+    /* Class-based floating phone buttons */
+    .floating-phone-btn span,
+    .phone-btn:not(.quick-contact .phone-btn):not(.footer-section .phone-btn) span,
+    a[href^="tel:"].floating-action:not(.quick-contact a):not(.footer-section a) span,
+    a[href^="tel:"][class*="floating"]:not(.quick-contact a):not(.footer-section a) span {
         display: none !important;
     }
 }
@@ -3768,21 +3758,17 @@ a[href^="tel:"] i {
         right: 15px !important; /* Same right position */
     }
     
-    /* Hide phone number text on 480px screens */
-    .phone-btn span,
-    [href^="tel:"] span,
-    .support-btn span,
-    .quick-contact-btn span,
-    .quick-contact-btn .quick-subtitle,
-    .quick-contact-btn .quick-title,
-    .quick-contact-btn div,
-    a[href*="tel:"] span,
-    a[href*="tel:"] .quick-subtitle,
-    a[href*="tel:"] .quick-title,
-    a[href*="tel:"] div,
-    a[class*="support-btn"] span,
-    a[class*="quick-contact-btn"] span,
-    a[class*="quick-contact-btn"] div {
+    /* ONLY hide text on FLOATING sidebar icons - precise targeting for 480px */
+    /* Target phone icons in specific positions (not content areas) */
+    .footer [href^="tel:"]:not(.footer-section [href^="tel:"]):not(.quick-contact [href^="tel:"]) span,
+    .footer [href^="tel:"]:not(.footer-section [href^="tel:"]):not(.quick-contact [href^="tel:"]) div,
+    .contact [href^="tel:"]:not(.footer-section [href^="tel:"]):not(.quick-contact [href^="tel:"]) span, 
+    .contact [href^="tel:"]:not(.footer-section [href^="tel:"]):not(.quick-contact [href^="tel:"]) div,
+    /* Class-based floating phone buttons */
+    .floating-phone-btn span,
+    .phone-btn:not(.quick-contact .phone-btn):not(.footer-section .phone-btn) span,
+    a[href^="tel:"].floating-action:not(.quick-contact a):not(.footer-section a) span,
+    a[href^="tel:"][class*="floating"]:not(.quick-contact a):not(.footer-section a) span {
         display: none !important;
     }
 }
@@ -3826,21 +3812,17 @@ a[href^="tel:"] i {
         right: 12px !important; /* Same right position */
     }
     
-    /* Hide phone number text on 400px screens */
-    .phone-btn span,
-    [href^="tel:"] span,
-    .support-btn span,
-    .quick-contact-btn span,
-    .quick-contact-btn .quick-subtitle,
-    .quick-contact-btn .quick-title,
-    .quick-contact-btn div,
-    a[href*="tel:"] span,
-    a[href*="tel:"] .quick-subtitle,
-    a[href*="tel:"] .quick-title,
-    a[href*="tel:"] div,
-    a[class*="support-btn"] span,
-    a[class*="quick-contact-btn"] span,
-    a[class*="quick-contact-btn"] div {
+    /* ONLY hide text on FLOATING sidebar icons - precise targeting for 400px */
+    /* Target phone icons in specific positions (not content areas) */
+    .footer [href^="tel:"]:not(.footer-section [href^="tel:"]):not(.quick-contact [href^="tel:"]) span,
+    .footer [href^="tel:"]:not(.footer-section [href^="tel:"]):not(.quick-contact [href^="tel:"]) div,
+    .contact [href^="tel:"]:not(.footer-section [href^="tel:"]):not(.quick-contact [href^="tel:"]) span, 
+    .contact [href^="tel:"]:not(.footer-section [href^="tel:"]):not(.quick-contact [href^="tel:"]) div,
+    /* Class-based floating phone buttons */
+    .floating-phone-btn span,
+    .phone-btn:not(.quick-contact .phone-btn):not(.footer-section .phone-btn) span,
+    a[href^="tel:"].floating-action:not(.quick-contact a):not(.footer-section a) span,
+    a[href^="tel:"][class*="floating"]:not(.quick-contact a):not(.footer-section a) span {
         display: none !important;
     }
 }
