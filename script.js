@@ -1258,18 +1258,8 @@ class ChatbotAssistant {
             this.hasAutoPopped = true;
             this.openChatbot();
             
-            // Add welcome message for auto-popup
-            setTimeout(() => {
-                this.addBotMessage(
-                    "👋 Welcome to Srivenkateshwara NON Woven Bags! I'm here to help you find the perfect bags for your needs. How can I assist you today?",
-                    [
-                        { text: "Get a Quote", value: "get_quote", icon: "fas fa-calculator" },
-                        { text: "Product Info", value: "product_info", icon: "fas fa-info-circle" },
-                        { text: "Bulk Orders", value: "bulk_order", icon: "fas fa-boxes" }
-                    ],
-                    1000
-                );
-            }, 500);
+            // No need to add another welcome message - HTML already has one
+            console.log('Auto-popup triggered - using existing welcome message');
         }
     }
 
@@ -1302,32 +1292,21 @@ class ChatbotAssistant {
         
         circleIcon.innerHTML = '<i class="fas fa-headset"></i>';
         
-        // Add click event to restore chatbot
-        let clickTimer = null;
-        circleIcon.addEventListener('mousedown', (e) => {
-            clickTimer = setTimeout(() => {
-                clickTimer = null;
-            }, 200);
-        });
-        
-        circleIcon.addEventListener('mouseup', (e) => {
-            if (clickTimer && !this.isDragging) {
-                clearTimeout(clickTimer);
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Circle icon clicked - restoring chatbot');
-                this.restoreChatbot();
-            }
-        });
-        
-        // Backup click handler
+        // Add simple click event to restore chatbot
         circleIcon.addEventListener('click', (e) => {
-            if (!this.isDragging) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Backup click handler triggered');
-                this.restoreChatbot();
-            }
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Circle icon clicked, isDragging:', this.isDragging);
+            
+            // Add small delay to ensure drag state is properly set
+            setTimeout(() => {
+                if (!this.isDragging) {
+                    console.log('Restoring chatbot from circle click');
+                    this.restoreChatbot();
+                } else {
+                    console.log('Click ignored - was dragging');
+                }
+            }, 100);
         });
 
         // Make it draggable
@@ -1432,20 +1411,18 @@ class ChatbotAssistant {
 
         const onMouseUp = () => {
             isDragging = false;
-            setTimeout(() => {
-                this.isDragging = false;
-            }, 50);
+            this.isDragging = false;
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
+            console.log('Mouse up - isDragging set to false');
         };
 
         const onTouchEnd = () => {
             isDragging = false;
-            setTimeout(() => {
-                this.isDragging = false;
-            }, 50);
+            this.isDragging = false;
             document.removeEventListener('touchmove', onTouchMove);
             document.removeEventListener('touchend', onTouchEnd);
+            console.log('Touch end - isDragging set to false');
         };
     }
 
@@ -1924,46 +1901,64 @@ class ChatbotAssistant {
         const isModification = this.orderHistory.filter(order => order.id === this.currentOrderId).length > 1;
         
         const orderDetails = `
-┌──────────────────────────────────────┐
-│        ${isModification ? '🔄 ORDER MODIFICATION' : '🛍️ NEW ORDER REQUEST'}           │
-└──────────────────────────────────────┘
+╔════════════════════════════════════════╗
+║     ${isModification ? '🔄 ORDER MODIFICATION REQUEST' : '🛍️ NEW ORDER REQUEST'}     ║
+╚════════════════════════════════════════╝
 
 🏢 *SRIVENKATESHWARA NON WOVEN BAGS*
-📋 Order Reference: *${this.currentOrderId}*
-📅 Date: ${new Date().toLocaleDateString()}
-⏰ Time: ${new Date().toLocaleTimeString()}
+📞 Contact: +91 6302067390
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+┌─────────────────────────────────────────┐
+│              ORDER DETAILS              │
+├─────────────────────────────────────────┤
+│ 📋 Order ID      │ ${this.currentOrderId.padEnd(20)} │
+│ 📅 Date          │ ${new Date().toLocaleDateString().padEnd(20)} │
+│ ⏰ Time          │ ${new Date().toLocaleTimeString().padEnd(20)} │
+│ 📦 Product       │ ${product.name.padEnd(20)} │
+│ 📊 Quantity      │ ${quantityText.padEnd(20)} │
+│ 💰 Price Range   │ ${estimatedPrice.padEnd(20)} │
+└─────────────────────────────────────────┘
 
-📦 *PRODUCT DETAILS:*
-   • Product Type: *${product.name}*
-   • Quantity Required: *${quantityText}*
-   • Estimated Price Range: *${estimatedPrice}*
+┌─────────────────────────────────────────┐
+│             PRODUCT FEATURES            │
+├─────────────────────────────────────────┤
+${product.features.map(feature => `│ ✓ ${feature.padEnd(37)} │`).join('\n')}
+└─────────────────────────────────────────┘
 
-🔧 *KEY FEATURES:*
-${product.features.map(feature => `   ✓ ${feature}`).join('\n')}
+${isModification ? `┌─────────────────────────────────────────┐
+│           ⚠️ MODIFICATION NOTICE          │
+├─────────────────────────────────────────┤
+│ This is an update to existing order     │
+│ with the same reference ID              │
+└─────────────────────────────────────────┘
 
-${isModification ? '\n⚠️ *MODIFICATION NOTICE:*\n   This is an update to previous order with same ID\n' : ''}
+` : ''}┌─────────────────────────────────────────┐
+│            QUOTATION REQUIRED           │
+├─────────────────────────────────────────┤
+│ ✅ Final pricing breakdown              │
+│ ✅ Delivery timeline & shipping cost    │
+│ ✅ Customization options available      │
+│ ✅ Payment terms & conditions           │
+│ ✅ Sample availability & MOQ details    │
+│ ✅ Logo printing specifications         │
+└─────────────────────────────────────────┘
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 *Additional Requirements:*
+_Please specify any special customization_
+_or delivery requirements below:_
 
-📋 *PLEASE PROVIDE:*
-   ✅ Final quotation with exact pricing
-   ✅ Delivery timeline & shipping costs
-   ✅ Customization options (colors, logo printing)
-   ✅ Payment terms & methods
-   ✅ Sample availability & MOQ details
+┌─────────────────────────────────────────┐
+│                                         │
+│  [Add your specific requirements here]  │
+│                                         │
+└─────────────────────────────────────────┘
 
-💬 *ADDITIONAL REQUIREMENTS:*
-   [Please specify any special requirements]
+🏆 *Thank you for considering our services!*
+📧 Generated automatically via SV Bags website
+🌐 Professional non-woven bag solutions
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🏆 Looking forward to your professional service!
-📱 Generated via SV Bags Website Assistant
-
-*Best Regards,*
-*Website Customer*
+*Awaiting your detailed quotation,*
+*Customer via Website*
         `.trim();
 
         const whatsappUrl = `https://wa.me/916302067390?text=${encodeURIComponent(orderDetails)}`;
@@ -2177,18 +2172,21 @@ What would you like to modify?`,
             orderMap.set(order.id, order);
         });
 
-        let trackingInfo = "📋 Your Order History:\n\n";
+        let trackingInfo = "📋 *YOUR ORDER HISTORY*\n";
+        trackingInfo += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
         
         orderMap.forEach((order, orderId) => {
             const date = new Date(order.timestamp).toLocaleDateString();
             const time = new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
-            trackingInfo += `🔸 Order ID: ${orderId}\n`;
-            trackingInfo += `📦 Product: ${order.product}\n`;
-            trackingInfo += `📊 Quantity: ${order.quantity}\n`;
-            trackingInfo += `💰 Price: ${order.price}\n`;
-            trackingInfo += `📅 Date: ${date} at ${time}\n`;
-            trackingInfo += `📌 Status: ${order.status}\n\n`;
+            trackingInfo += `┌─ *Order #${orderId}*\n`;
+            trackingInfo += `│ 📦  Product     : ${order.product}\n`;
+            trackingInfo += `│ 📊  Quantity    : ${order.quantity}\n`;
+            trackingInfo += `│ 💰  Price Range : ${order.price}\n`;
+            trackingInfo += `│ 📅  Date        : ${date}\n`;
+            trackingInfo += `│ ⏰  Time        : ${time}\n`;
+            trackingInfo += `│ 📌  Status      : ${order.status.toUpperCase()}\n`;
+            trackingInfo += `└─────────────────────────────────\n\n`;
         });
 
         this.addBotMessage(
