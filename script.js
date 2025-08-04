@@ -1300,14 +1300,32 @@ class ChatbotAssistant {
             border: 2px solid rgba(255, 255, 255, 0.3);
         `;
         
-        circleIcon.innerHTML = '<i class="fas fa-comments"></i>';
+        circleIcon.innerHTML = '<i class="fas fa-headset"></i>';
         
         // Add click event to restore chatbot
+        let clickTimer = null;
+        circleIcon.addEventListener('mousedown', (e) => {
+            clickTimer = setTimeout(() => {
+                clickTimer = null;
+            }, 200);
+        });
+        
+        circleIcon.addEventListener('mouseup', (e) => {
+            if (clickTimer && !this.isDragging) {
+                clearTimeout(clickTimer);
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Circle icon clicked - restoring chatbot');
+                this.restoreChatbot();
+            }
+        });
+        
+        // Backup click handler
         circleIcon.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Circle icon clicked, isDragging:', this.isDragging);
             if (!this.isDragging) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Backup click handler triggered');
                 this.restoreChatbot();
             }
         });
@@ -1344,7 +1362,7 @@ class ChatbotAssistant {
             animation: bounceIn 0.5s ease-out;
         `;
         
-        reopenBtn.innerHTML = '<i class="fas fa-comment"></i>';
+        reopenBtn.innerHTML = '<i class="fas fa-headset"></i>';
         
         reopenBtn.addEventListener('click', () => {
             const button = document.getElementById('chatbot-button');
@@ -1416,7 +1434,7 @@ class ChatbotAssistant {
             isDragging = false;
             setTimeout(() => {
                 this.isDragging = false;
-            }, 200);
+            }, 50);
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
         };
@@ -1425,7 +1443,7 @@ class ChatbotAssistant {
             isDragging = false;
             setTimeout(() => {
                 this.isDragging = false;
-            }, 200);
+            }, 50);
             document.removeEventListener('touchmove', onTouchMove);
             document.removeEventListener('touchend', onTouchEnd);
         };
@@ -1528,7 +1546,7 @@ class ChatbotAssistant {
 
             messageElement.innerHTML = `
                 <div class="message-avatar">
-                    <i class="fas fa-robot"></i>
+                    <i class="fas fa-user-tie"></i>
                 </div>
                 <div class="message-content">
                     <p>${message}</p>
@@ -1549,7 +1567,7 @@ class ChatbotAssistant {
         typingElement.className = 'chatbot-message bot-message typing-message';
         typingElement.innerHTML = `
             <div class="message-avatar">
-                <i class="fas fa-robot"></i>
+                <i class="fas fa-user-tie"></i>
             </div>
             <div class="message-content">
                 <div class="typing-indicator">
@@ -1752,7 +1770,7 @@ class ChatbotAssistant {
         orderElement.className = 'chatbot-message bot-message';
         orderElement.innerHTML = `
             <div class="message-avatar">
-                <i class="fas fa-robot"></i>
+                <i class="fas fa-user-tie"></i>
             </div>
             <div class="message-content order-summary-wrapper">
                 ${orderSummaryHtml}
@@ -1813,7 +1831,7 @@ class ChatbotAssistant {
                 productElement.className = 'chatbot-message bot-message';
                 productElement.innerHTML = `
                     <div class="message-avatar">
-                        <i class="fas fa-robot"></i>
+                        <i class="fas fa-user-tie"></i>
                     </div>
                     <div class="message-content">
                         ${productCardHtml}
@@ -1841,7 +1859,12 @@ class ChatbotAssistant {
         );
 
         setTimeout(() => {
-            this.askForQuantity(bagType);
+            // If user already selected quantity (from bulk order flow), proceed directly
+            if (this.userData.quantity && this.currentStep === 'bag_type_bulk') {
+                this.proceedWithOrder();
+            } else {
+                this.askForQuantity(bagType);
+            }
         }, 1200);
     }
 
@@ -1901,28 +1924,46 @@ class ChatbotAssistant {
         const isModification = this.orderHistory.filter(order => order.id === this.currentOrderId).length > 1;
         
         const orderDetails = `
-Hi Srivenkateshwara NON Woven Bags,
+┌──────────────────────────────────────┐
+│        ${isModification ? '🔄 ORDER MODIFICATION' : '🛍️ NEW ORDER REQUEST'}           │
+└──────────────────────────────────────┘
 
-${isModification ? '🔄 ORDER MODIFICATION REQUEST' : '🛍️ NEW ORDER REQUEST'}
+🏢 *SRIVENKATESHWARA NON WOVEN BAGS*
+📋 Order Reference: *${this.currentOrderId}*
+📅 Date: ${new Date().toLocaleDateString()}
+⏰ Time: ${new Date().toLocaleTimeString()}
 
-📋 Order ID: ${this.currentOrderId}
-📦 Product Type: ${product.name}
-📊 Quantity Needed: ${quantityText}
-💰 Expected Price Range: ${estimatedPrice}
-🔧 Product Features: ${product.features.join(', ')}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-${isModification ? 'MODIFICATION STATUS: This is an update to my previous order with the same ID.' : ''}
+📦 *PRODUCT DETAILS:*
+   • Product Type: *${product.name}*
+   • Quantity Required: *${quantityText}*
+   • Estimated Price Range: *${estimatedPrice}*
 
-Please provide me with:
-✅ Detailed quote with exact pricing
-✅ Delivery timeline and shipping cost
-✅ Customization options (logo printing, colors)
-✅ Payment terms and methods
-✅ Sample availability
+🔧 *KEY FEATURES:*
+${product.features.map(feature => `   ✓ ${feature}`).join('\n')}
 
-Additional Requirements: [Please specify any special requirements]
+${isModification ? '\n⚠️ *MODIFICATION NOTICE:*\n   This is an update to previous order with same ID\n' : ''}
 
-Thank you for your quick response!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 *PLEASE PROVIDE:*
+   ✅ Final quotation with exact pricing
+   ✅ Delivery timeline & shipping costs
+   ✅ Customization options (colors, logo printing)
+   ✅ Payment terms & methods
+   ✅ Sample availability & MOQ details
+
+💬 *ADDITIONAL REQUIREMENTS:*
+   [Please specify any special requirements]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🏆 Looking forward to your professional service!
+📱 Generated via SV Bags Website Assistant
+
+*Best Regards,*
+*Website Customer*
         `.trim();
 
         const whatsappUrl = `https://wa.me/916302067390?text=${encodeURIComponent(orderDetails)}`;
@@ -2032,7 +2073,7 @@ Thank you for your quick response!
                 contactElement.className = 'chatbot-message bot-message';
                 contactElement.innerHTML = `
                     <div class="message-avatar">
-                        <i class="fas fa-robot"></i>
+                        <i class="fas fa-user-tie"></i>
                     </div>
                     <div class="message-content">
                         <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin: 8px 0;">
