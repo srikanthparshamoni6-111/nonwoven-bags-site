@@ -1290,23 +1290,88 @@ class ChatbotAssistant {
             border: 2px solid rgba(255, 255, 255, 0.3);
         `;
         
+        // Add tooltip
+        circleIcon.title = 'Click to open chat • Double-click for instant open • Drag to move';
+        
         circleIcon.innerHTML = '<i class="fas fa-headset"></i>';
         
-        // Add simple click event to restore chatbot
-        circleIcon.addEventListener('click', (e) => {
+        // Add double-click event to restore chatbot (more reliable)
+        circleIcon.addEventListener('dblclick', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Circle icon clicked, isDragging:', this.isDragging);
+            console.log('Circle icon double-clicked - restoring chatbot');
+            this.restoreChatbot();
+        });
+
+        // Add single click with better detection
+        let clickStartTime = 0;
+        let hasMoved = false;
+        
+        circleIcon.addEventListener('mousedown', (e) => {
+            clickStartTime = Date.now();
+            hasMoved = false;
+            console.log('Mouse down on circle');
+        });
+        
+        circleIcon.addEventListener('mousemove', (e) => {
+            if (clickStartTime > 0) {
+                hasMoved = true;
+            }
+        });
+        
+        circleIcon.addEventListener('mouseup', (e) => {
+            const clickDuration = Date.now() - clickStartTime;
+            console.log('Mouse up on circle. Duration:', clickDuration, 'Moved:', hasMoved);
             
-            // Add small delay to ensure drag state is properly set
-            setTimeout(() => {
-                if (!this.isDragging) {
-                    console.log('Restoring chatbot from circle click');
-                    this.restoreChatbot();
-                } else {
-                    console.log('Click ignored - was dragging');
-                }
-            }, 100);
+            if (clickDuration < 200 && !hasMoved) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Quick click detected - restoring chatbot');
+                this.restoreChatbot();
+            }
+            
+            clickStartTime = 0;
+            hasMoved = false;
+        });
+
+        // Add touch support for mobile
+        let touchStartTime = 0;
+        let touchHasMoved = false;
+        
+        circleIcon.addEventListener('touchstart', (e) => {
+            touchStartTime = Date.now();
+            touchHasMoved = false;
+            console.log('Touch start on circle');
+        });
+        
+        circleIcon.addEventListener('touchmove', (e) => {
+            if (touchStartTime > 0) {
+                touchHasMoved = true;
+            }
+        });
+        
+        circleIcon.addEventListener('touchend', (e) => {
+            const touchDuration = Date.now() - touchStartTime;
+            console.log('Touch end on circle. Duration:', touchDuration, 'Moved:', touchHasMoved);
+            
+            if (touchDuration < 200 && !touchHasMoved) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Quick touch detected - restoring chatbot');
+                this.restoreChatbot();
+            }
+            
+            touchStartTime = 0;
+            touchHasMoved = false;
+        });
+
+        // Add visual pulse to indicate it's clickable
+        circleIcon.addEventListener('mouseenter', () => {
+            circleIcon.style.animation = 'pulse 1s infinite';
+        });
+        
+        circleIcon.addEventListener('mouseleave', () => {
+            circleIcon.style.animation = 'floatCircle 3s ease-in-out infinite';
         });
 
         // Make it draggable
@@ -1362,17 +1427,28 @@ class ChatbotAssistant {
         let startLeft = 0;
         let startTop = 0;
 
-        // Mouse events
+        // Mouse events for dragging (with delay to allow clicks)
+        let dragTimer = null;
         element.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            this.isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            startLeft = parseInt(window.getComputedStyle(element).left);
-            startTop = parseInt(window.getComputedStyle(element).top);
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-            e.preventDefault();
+            // Only start dragging after a short delay to allow clicks
+            dragTimer = setTimeout(() => {
+                isDragging = true;
+                this.isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                startLeft = parseInt(window.getComputedStyle(element).left);
+                startTop = parseInt(window.getComputedStyle(element).top);
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+                console.log('Drag mode activated');
+            }, 150);
+        });
+        
+        element.addEventListener('mouseup', (e) => {
+            if (dragTimer) {
+                clearTimeout(dragTimer);
+                dragTimer = null;
+            }
         });
 
         // Touch events for mobile
@@ -1437,7 +1513,49 @@ class ChatbotAssistant {
             circleIcon.style.display = 'flex';
             this.isOpen = false;
             this.isMinimized = true;
+            
+            // Add attention-grabbing animation when first shown
+            circleIcon.style.animation = 'bounceIn 0.5s ease-out, pulse 2s infinite 0.5s';
+            
+            // Show helpful tooltip animation
+            setTimeout(() => {
+                this.showMinimizeHint(circleIcon);
+            }, 600);
         }
+    }
+    
+    showMinimizeHint(circleIcon) {
+        // Create temporary hint bubble
+        const hint = document.createElement('div');
+        hint.style.cssText = `
+            position: fixed;
+            top: ${circleIcon.offsetTop}px;
+            left: ${circleIcon.offsetLeft + 70}px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease-out;
+            pointer-events: none;
+            white-space: nowrap;
+        `;
+        hint.textContent = 'Click to restore chat';
+        
+        document.body.appendChild(hint);
+        
+        // Remove hint after 3 seconds
+        setTimeout(() => {
+            if (hint.parentNode) {
+                hint.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    if (hint.parentNode) {
+                        hint.remove();
+                    }
+                }, 300);
+            }
+        }, 3000);
     }
 
     restoreChatbot() {
