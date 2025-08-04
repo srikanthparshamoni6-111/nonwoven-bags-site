@@ -2037,95 +2037,61 @@ class ChatbotAssistant {
         // Determine if this is a modification
         const isModification = this.orderHistory.filter(order => order.id === this.currentOrderId).length > 1;
         
-        // Create professional date formatting
-        const now = new Date();
-        const orderDate = now.toLocaleDateString('en-US', { 
-            weekday: 'long',
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
-        const orderTime = now.toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true,
-            timeZoneName: 'short'
-        });
+        const orderDetails = `Hello! 👋
 
-        const orderDetails = `🏢 *SRIVENKATESHWARA NON WOVEN BAGS*
-📍 *Premium Quality • Eco-Friendly Solutions*
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+I'm interested in getting a quote for non-woven bags from your company.
 
-${isModification ? '🔄 *ORDER MODIFICATION REQUEST*' : '🆕 *NEW QUOTATION REQUEST*'}
+🏢 *SRIVENKATESHWARA NON WOVEN BAGS*
+📞 Contact: +91 6302067390
 
-📋 *ORDER REFERENCE:* #${this.currentOrderId}
-📅 *Date:* ${orderDate}
-⏰ *Time:* ${orderTime}
+${isModification ? '🔄 *ORDER MODIFICATION REQUEST*' : '🆕 *QUOTATION REQUEST*'}
+Order Reference: *#${this.currentOrderId}*
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📦 *PRODUCT SPECIFICATION*
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 *PRODUCT DETAILS:*
+• Product: ${product.name}
+• Quantity: ${quantityText}
+• Budget Range: ${estimatedPrice}
 
-🛍️ *Product Type:* ${product.name}
-📊 *Required Quantity:* ${quantityText}
-💰 *Estimated Budget:* ${estimatedPrice}
+🌟 *Key Features Required:*
+${product.features.map(feature => `• ${feature}`).join('\n')}
 
-🌟 *Key Features:*
-${product.features.map(feature => `   ✅ ${feature}`).join('\n')}
+💼 *PLEASE PROVIDE QUOTE FOR:*
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 *QUOTATION REQUIREMENTS*
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+*Pricing:*
+• Unit price per piece
+• Volume discounts available
+• GST and total cost breakdown
 
-Please provide comprehensive quote including:
+*Production & Delivery:*
+• Manufacturing timeline
+• Packaging details
+• Shipping options and costs
 
-💼 *PRICING BREAKDOWN*
-   • Unit price per piece
-   • Volume discount tiers
-   • GST and tax details
-   • Total investment required
+*Customization:*
+• Logo printing/embossing options
+• Color and size variations
+• Design customization capabilities
 
-📦 *PRODUCTION & DELIVERY*
-   • Manufacturing timeline
-   • Packaging specifications
-   • Shipping costs & methods
-   • Delivery schedule options
-
-🎨 *CUSTOMIZATION OPTIONS*
-   • Logo printing/embossing capabilities
-   • Color customization available
-   • Size variations possible
-   • Special design requirements
-
-📄 *BUSINESS TERMS*
-   • Minimum order quantity (MOQ)
-   • Payment terms & conditions
-   • Sample availability & costs
-   • Warranty/quality guarantees
+*Business Terms:*
+• Minimum order quantity
+• Payment terms
+• Sample availability
+• Quality guarantees
 
 ${isModification ? `
-⚠️ *MODIFICATION NOTICE*
-This is an update to existing order #${this.currentOrderId}
-Previous specifications are being revised as per new requirements.
+⚠️ *NOTE:* This is a modification to my previous order #${this.currentOrderId}. Please update the specifications accordingly.
 
-` : ''}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📞 *CONTACT INFORMATION*
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+` : ''}📱 *Response Expected:* Within 2-4 business hours
 
-📱 *WhatsApp/Phone:* +91 6302067390
-🌐 *Website Order:* Auto-generated inquiry
-📧 *Response Time:* Within 2-4 business hours
+*Additional Requirements:*
+Please let me know if you need any specific details about customization, delivery location, or special requirements.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Thank you for your time and looking forward to your detailed quotation!
 
-*Additional Requirements/Notes:*
-_Please mention any specific customization, delivery preferences, or special requirements in your response._
+Best regards,
+Customer via Website
 
-🙏 *Thank you for choosing Srivenkateshwara Non Woven Bags!*
-💼 *Professional • Reliable • Quality Assured*
-
-*Best regards,*
-*Website Customer*`.trim();
+🌐 Auto-generated from SV Bags website`.trim();
 
         const whatsappUrl = `https://wa.me/916302067390?text=${encodeURIComponent(orderDetails)}`;
         

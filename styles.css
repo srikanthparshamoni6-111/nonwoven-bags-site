@@ -3375,12 +3375,13 @@ html {
 }
 
 .order-summary-card.premium .detail-section h5 {
-    color: rgba(255, 255, 255, 0.9);
+    color: #ffffff;
     font-size: 14px;
     margin: 15px 0 10px 0;
     padding-bottom: 5px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .order-summary-card.premium .detail-item {
@@ -3392,9 +3393,10 @@ html {
 }
 
 .order-summary-card.premium .detail-item .label {
-    color: rgba(255, 255, 255, 0.8);
+    color: #f1f5f9;
     font-size: 13px;
     font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .order-summary-card.premium .detail-item .value.highlight {
@@ -3418,8 +3420,9 @@ html {
 
 .order-summary-card.premium .feature-item {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.9);
+    color: #f8fafc;
     padding: 2px 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .order-summary-card.premium .order-footer {
@@ -3430,15 +3433,17 @@ html {
 
 .order-summary-card.premium .next-steps {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
+    color: #e2e8f0;
     text-align: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .order-summary-card.premium .next-steps strong {
-    color: white;
+    color: #ffffff;
     display: block;
     margin-bottom: 5px;
     font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .premium-btn {
