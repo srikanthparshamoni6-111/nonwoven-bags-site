@@ -2894,11 +2894,18 @@ html {
 /* Movable Circle Icon */
 .chatbot-circle-icon {
     animation: floatCircle 3s ease-in-out infinite;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
 }
 
 .chatbot-circle-icon:hover {
     transform: translateY(-50%) scale(1.1);
     box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.chatbot-circle-icon:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
 @keyframes floatCircle {
@@ -2907,6 +2914,23 @@ html {
     }
     50% { 
         box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }
 

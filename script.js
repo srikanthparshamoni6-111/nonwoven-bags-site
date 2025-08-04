@@ -986,12 +986,12 @@ class ChatbotAssistant {
         this.setupConversationFlow();
         this.createMovableCircleIcon();
         
-        // Auto-popup chatbot after 2 seconds
+        // Auto-popup chatbot immediately
         setTimeout(() => {
             if (!this.hasAutoPopped) {
                 this.autoPopupChatbot();
             }
-        }, 2000);
+        }, 100);
     }
 
     bindEvents() {
@@ -1000,9 +1000,9 @@ class ChatbotAssistant {
             this.toggleChatbot();
         });
 
-        // Close chatbot
+        // Close chatbot (minimize to circle)
         document.getElementById('chatbot-close')?.addEventListener('click', () => {
-            this.closeChatbot();
+            this.minimizeChatbot();
         });
 
         // Minimize chatbot (convert to circle)
@@ -1218,10 +1218,32 @@ class ChatbotAssistant {
 
     closeChatbot() {
         const container = document.getElementById('chatbot-container');
+        const button = document.getElementById('chatbot-button');
+        const circleIcon = document.getElementById('chatbot-circle-icon');
+        const reopenBtn = document.getElementById('chatbot-reopen-btn');
+        
         if (container) {
             container.classList.remove('active');
             this.isOpen = false;
         }
+        
+        // Completely hide chatbot when closed
+        if (button) {
+            button.style.display = 'none';
+        }
+        
+        if (circleIcon) {
+            circleIcon.style.display = 'none';
+        }
+        
+        // Show reopen button after a delay
+        if (reopenBtn) {
+            setTimeout(() => {
+                reopenBtn.style.display = 'flex';
+            }, 3000);
+        }
+        
+        this.isMinimized = false;
     }
 
     showNotification() {
@@ -1275,12 +1297,16 @@ class ChatbotAssistant {
             transition: all 0.3s ease;
             transform: translateY(-50%);
             user-select: none;
+            border: 2px solid rgba(255, 255, 255, 0.3);
         `;
         
         circleIcon.innerHTML = '<i class="fas fa-comments"></i>';
         
         // Add click event to restore chatbot
-        circleIcon.addEventListener('click', () => {
+        circleIcon.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Circle icon clicked, isDragging:', this.isDragging);
             if (!this.isDragging) {
                 this.restoreChatbot();
             }
@@ -1290,18 +1316,62 @@ class ChatbotAssistant {
         this.makeDraggable(circleIcon);
         
         document.body.appendChild(circleIcon);
+        
+        // Create fallback reopen button for completely closed chatbot
+        this.createReopenButton();
+    }
+
+    createReopenButton() {
+        const reopenBtn = document.createElement('div');
+        reopenBtn.id = 'chatbot-reopen-btn';
+        reopenBtn.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 9997;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+            transition: all 0.3s ease;
+            animation: bounceIn 0.5s ease-out;
+        `;
+        
+        reopenBtn.innerHTML = '<i class="fas fa-comment"></i>';
+        
+        reopenBtn.addEventListener('click', () => {
+            const button = document.getElementById('chatbot-button');
+            if (button) {
+                button.style.display = 'flex';
+                reopenBtn.style.display = 'none';
+                this.openChatbot();
+            }
+        });
+        
+        document.body.appendChild(reopenBtn);
     }
 
     makeDraggable(element) {
         let isDragging = false;
+        let startX = 0;
         let startY = 0;
+        let startLeft = 0;
         let startTop = 0;
 
         // Mouse events
         element.addEventListener('mousedown', (e) => {
             isDragging = true;
             this.isDragging = true;
+            startX = e.clientX;
             startY = e.clientY;
+            startLeft = parseInt(window.getComputedStyle(element).left);
             startTop = parseInt(window.getComputedStyle(element).top);
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
@@ -1312,7 +1382,9 @@ class ChatbotAssistant {
         element.addEventListener('touchstart', (e) => {
             isDragging = true;
             this.isDragging = true;
+            startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
+            startLeft = parseInt(window.getComputedStyle(element).left);
             startTop = parseInt(window.getComputedStyle(element).top);
             document.addEventListener('touchmove', onTouchMove);
             document.addEventListener('touchend', onTouchEnd);
@@ -1321,15 +1393,21 @@ class ChatbotAssistant {
 
         const onMouseMove = (e) => {
             if (!isDragging) return;
+            const deltaX = e.clientX - startX;
             const deltaY = e.clientY - startY;
+            const newLeft = Math.max(10, Math.min(window.innerWidth - 70, startLeft + deltaX));
             const newTop = Math.max(30, Math.min(window.innerHeight - 90, startTop + deltaY));
+            element.style.left = newLeft + 'px';
             element.style.top = newTop + 'px';
         };
 
         const onTouchMove = (e) => {
             if (!isDragging) return;
+            const deltaX = e.touches[0].clientX - startX;
             const deltaY = e.touches[0].clientY - startY;
+            const newLeft = Math.max(10, Math.min(window.innerWidth - 70, startLeft + deltaX));
             const newTop = Math.max(30, Math.min(window.innerHeight - 90, startTop + deltaY));
+            element.style.left = newLeft + 'px';
             element.style.top = newTop + 'px';
             e.preventDefault();
         };
@@ -1338,7 +1416,7 @@ class ChatbotAssistant {
             isDragging = false;
             setTimeout(() => {
                 this.isDragging = false;
-            }, 100);
+            }, 200);
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
         };
@@ -1347,7 +1425,7 @@ class ChatbotAssistant {
             isDragging = false;
             setTimeout(() => {
                 this.isDragging = false;
-            }, 100);
+            }, 200);
             document.removeEventListener('touchmove', onTouchMove);
             document.removeEventListener('touchend', onTouchEnd);
         };
@@ -1368,6 +1446,7 @@ class ChatbotAssistant {
     }
 
     restoreChatbot() {
+        console.log('Restoring chatbot...');
         const container = document.getElementById('chatbot-container');
         const button = document.getElementById('chatbot-button');
         const circleIcon = document.getElementById('chatbot-circle-icon');
@@ -1377,6 +1456,9 @@ class ChatbotAssistant {
             button.style.display = 'flex';
             this.openChatbot();
             this.isMinimized = false;
+            console.log('Chatbot restored successfully');
+        } else {
+            console.log('Failed to restore chatbot - missing elements');
         }
     }
 
@@ -2088,7 +2170,16 @@ What would you like to modify?`,
 
 // Initialize chatbot when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing chatbot...');
     window.chatbot = new ChatbotAssistant();
+});
+
+// Backup initialization
+window.addEventListener('load', () => {
+    if (!window.chatbot) {
+        console.log('Backup initialization triggered');
+        window.chatbot = new ChatbotAssistant();
+    }
 });
 
 // Additional event handling is now integrated into the main ChatbotAssistant class 
