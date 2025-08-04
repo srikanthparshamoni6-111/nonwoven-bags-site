@@ -973,16 +973,25 @@ class ChatbotAssistant {
         this.userData = {};
         this.conversationFlow = {};
         this.isProcessing = false; // Prevent rapid multiple messages
+        this.isMinimized = false;
+        this.currentOrderId = null; // Track current order for modifications
+        this.orderHistory = []; // Store order history
+        this.hasAutoPopped = false; // Track if auto-popup has occurred
+        this.isDragging = false; // Track dragging state
         this.init();
     }
 
     init() {
         this.bindEvents();
         this.setupConversationFlow();
-        // Show notification after 3 seconds
+        this.createMovableCircleIcon();
+        
+        // Auto-popup chatbot after 2 seconds
         setTimeout(() => {
-            this.showNotification();
-        }, 3000);
+            if (!this.hasAutoPopped) {
+                this.autoPopupChatbot();
+            }
+        }, 2000);
     }
 
     bindEvents() {
@@ -994,6 +1003,11 @@ class ChatbotAssistant {
         // Close chatbot
         document.getElementById('chatbot-close')?.addEventListener('click', () => {
             this.closeChatbot();
+        });
+
+        // Minimize chatbot (convert to circle)
+        document.getElementById('chatbot-minimize')?.addEventListener('click', () => {
+            this.minimizeChatbot();
         });
 
         // Send message
@@ -1030,6 +1044,10 @@ class ChatbotAssistant {
                     this.handleQuickOption('get_quote');
                 } else if (action === 'modify_order') {
                     this.modifyCurrentOrder();
+                } else if (action === 'modify_current_order') {
+                    this.modifyCurrentOrder();
+                } else if (action === 'track_order') {
+                    this.showOrderTracking();
                 } else {
                     this.handleQuickOption(action);
                 }
@@ -1210,6 +1228,155 @@ class ChatbotAssistant {
         const notification = document.getElementById('chatbot-notification');
         if (notification && !this.isOpen) {
             notification.style.display = 'flex';
+        }
+    }
+
+    autoPopupChatbot() {
+        if (!this.hasAutoPopped && !this.isOpen) {
+            this.hasAutoPopped = true;
+            this.openChatbot();
+            
+            // Add welcome message for auto-popup
+            setTimeout(() => {
+                this.addBotMessage(
+                    "👋 Welcome to Srivenkateshwara NON Woven Bags! I'm here to help you find the perfect bags for your needs. How can I assist you today?",
+                    [
+                        { text: "Get a Quote", value: "get_quote", icon: "fas fa-calculator" },
+                        { text: "Product Info", value: "product_info", icon: "fas fa-info-circle" },
+                        { text: "Bulk Orders", value: "bulk_order", icon: "fas fa-boxes" }
+                    ],
+                    1000
+                );
+            }, 500);
+        }
+    }
+
+    createMovableCircleIcon() {
+        // Create movable circle icon
+        const circleIcon = document.createElement('div');
+        circleIcon.id = 'chatbot-circle-icon';
+        circleIcon.className = 'chatbot-circle-icon';
+        circleIcon.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 9998;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            transform: translateY(-50%);
+            user-select: none;
+        `;
+        
+        circleIcon.innerHTML = '<i class="fas fa-comments"></i>';
+        
+        // Add click event to restore chatbot
+        circleIcon.addEventListener('click', () => {
+            if (!this.isDragging) {
+                this.restoreChatbot();
+            }
+        });
+
+        // Make it draggable
+        this.makeDraggable(circleIcon);
+        
+        document.body.appendChild(circleIcon);
+    }
+
+    makeDraggable(element) {
+        let isDragging = false;
+        let startY = 0;
+        let startTop = 0;
+
+        // Mouse events
+        element.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            this.isDragging = true;
+            startY = e.clientY;
+            startTop = parseInt(window.getComputedStyle(element).top);
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+            e.preventDefault();
+        });
+
+        // Touch events for mobile
+        element.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            this.isDragging = true;
+            startY = e.touches[0].clientY;
+            startTop = parseInt(window.getComputedStyle(element).top);
+            document.addEventListener('touchmove', onTouchMove);
+            document.addEventListener('touchend', onTouchEnd);
+            e.preventDefault();
+        });
+
+        const onMouseMove = (e) => {
+            if (!isDragging) return;
+            const deltaY = e.clientY - startY;
+            const newTop = Math.max(30, Math.min(window.innerHeight - 90, startTop + deltaY));
+            element.style.top = newTop + 'px';
+        };
+
+        const onTouchMove = (e) => {
+            if (!isDragging) return;
+            const deltaY = e.touches[0].clientY - startY;
+            const newTop = Math.max(30, Math.min(window.innerHeight - 90, startTop + deltaY));
+            element.style.top = newTop + 'px';
+            e.preventDefault();
+        };
+
+        const onMouseUp = () => {
+            isDragging = false;
+            setTimeout(() => {
+                this.isDragging = false;
+            }, 100);
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+
+        const onTouchEnd = () => {
+            isDragging = false;
+            setTimeout(() => {
+                this.isDragging = false;
+            }, 100);
+            document.removeEventListener('touchmove', onTouchMove);
+            document.removeEventListener('touchend', onTouchEnd);
+        };
+    }
+
+    minimizeChatbot() {
+        const container = document.getElementById('chatbot-container');
+        const button = document.getElementById('chatbot-button');
+        const circleIcon = document.getElementById('chatbot-circle-icon');
+        
+        if (container && button && circleIcon) {
+            container.classList.remove('active');
+            button.style.display = 'none';
+            circleIcon.style.display = 'flex';
+            this.isOpen = false;
+            this.isMinimized = true;
+        }
+    }
+
+    restoreChatbot() {
+        const container = document.getElementById('chatbot-container');
+        const button = document.getElementById('chatbot-button');
+        const circleIcon = document.getElementById('chatbot-circle-icon');
+        
+        if (container && button && circleIcon) {
+            circleIcon.style.display = 'none';
+            button.style.display = 'flex';
+            this.openChatbot();
+            this.isMinimized = false;
         }
     }
 
@@ -1630,15 +1797,39 @@ class ChatbotAssistant {
         
         const estimatedPrice = this.getEstimatedPrice(this.userData.quantity);
         
+        // Generate or reuse order ID
+        if (!this.currentOrderId) {
+            this.currentOrderId = this.generateOrderId();
+        }
+        
+        // Create order object for tracking
+        const orderData = {
+            id: this.currentOrderId,
+            product: product.name,
+            quantity: quantityText,
+            price: estimatedPrice,
+            timestamp: new Date().toISOString(),
+            status: 'pending'
+        };
+        
+        // Store in order history
+        this.orderHistory.push(orderData);
+        
+        // Determine if this is a modification
+        const isModification = this.orderHistory.filter(order => order.id === this.currentOrderId).length > 1;
+        
         const orderDetails = `
 Hi Srivenkateshwara NON Woven Bags,
 
-I'm interested in placing an order through your website chatbot:
+${isModification ? '🔄 ORDER MODIFICATION REQUEST' : '🛍️ NEW ORDER REQUEST'}
 
+📋 Order ID: ${this.currentOrderId}
 📦 Product Type: ${product.name}
 📊 Quantity Needed: ${quantityText}
 💰 Expected Price Range: ${estimatedPrice}
-📋 Product Features: ${product.features.join(', ')}
+🔧 Product Features: ${product.features.join(', ')}
+
+${isModification ? 'MODIFICATION STATUS: This is an update to my previous order with the same ID.' : ''}
 
 Please provide me with:
 ✅ Detailed quote with exact pricing
@@ -1654,45 +1845,34 @@ Thank you for your quick response!
 
         const whatsappUrl = `https://wa.me/916302067390?text=${encodeURIComponent(orderDetails)}`;
         
-        const whatsappButtonHtml = `
-            <button class="whatsapp-order-btn" data-whatsapp-url="${whatsappUrl}">
-                <i class="fab fa-whatsapp"></i>
-                Send Order via WhatsApp
-            </button>
-        `;
-
+        // Direct WhatsApp opening - no intermediate button
         this.addBotMessage(
-            "🎉 Your order details are ready! Click the button below to send this directly to our WhatsApp for immediate processing:",
+            "🎉 Perfect! Opening WhatsApp now with your order details...",
             null,
             500
         );
 
         setTimeout(() => {
-            const messagesContainer = document.getElementById('chatbot-messages');
-            if (messagesContainer) {
-                const whatsappElement = document.createElement('div');
-                whatsappElement.className = 'chatbot-message bot-message';
-                whatsappElement.innerHTML = `
-                    <div class="message-avatar">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <div class="message-content">
-                        ${whatsappButtonHtml}
-                        <p style="font-size: 12px; color: #6c757d; margin-top: 10px;">
-                            <i class="fas fa-info-circle"></i> 
-                            This will open WhatsApp with your order details pre-filled. Our team typically responds within 2 hours!
-                        </p>
-                        <div class="quick-options">
-                            <button class="quick-option" data-action="new_quote">New Quote</button>
-                            <button class="quick-option" data-action="contact_sales">Call Sales</button>
-                            <button class="quick-option" data-action="modify_order">Modify This Order</button>
-                        </div>
-                    </div>
-                `;
-                messagesContainer.appendChild(whatsappElement);
-                this.scrollToBottom();
-            }
+            // Open WhatsApp directly
+            window.open(whatsappUrl, '_blank');
+            
+            // Show confirmation message
+            this.addBotMessage(
+                `✅ Order ${this.currentOrderId} sent to WhatsApp! Our team will respond within 2 hours with a detailed quote.`,
+                [
+                    { text: "New Quote", value: "new_quote", icon: "fas fa-plus" },
+                    { text: "Track Order", value: "track_order", icon: "fas fa-search" },
+                    { text: "Modify Order", value: "modify_current_order", icon: "fas fa-edit" }
+                ],
+                1000
+            );
         }, 1000);
+    }
+
+    generateOrderId() {
+        const timestamp = Date.now().toString();
+        const random = Math.random().toString(36).substr(2, 3).toUpperCase();
+        return `SV${timestamp.slice(-6)}${random}`;
     }
 
     processUserMessage(message) {
@@ -1812,31 +1992,90 @@ Thank you for your quick response!
         this.userData = {};
         this.currentStep = 'initial';
         this.isProcessing = false;
+        this.currentOrderId = null; // Reset order ID for new conversation
         
         this.addBotMessage(
             "🔄 Starting fresh! What would you like to know about our non-woven bags?",
             [
-                { text: "Get a Quote", value: "get_quote" },
-                { text: "Product Information", value: "product_info" },
-                { text: "Bulk Orders", value: "bulk_order" }
+                { text: "Get a Quote", value: "get_quote", icon: "fas fa-calculator" },
+                { text: "Product Information", value: "product_info", icon: "fas fa-info-circle" },
+                { text: "Bulk Orders", value: "bulk_order", icon: "fas fa-boxes" }
             ],
             600
         );
     }
 
     modifyCurrentOrder() {
+        if (!this.currentOrderId) {
+            this.addBotMessage(
+                "No active order found. Would you like to start a new quote?",
+                [
+                    { text: "New Quote", value: "get_quote", icon: "fas fa-plus" },
+                    { text: "Product Info", value: "product_info", icon: "fas fa-info-circle" }
+                ],
+                800
+            );
+            return;
+        }
+
         const product = this.productDetails[this.userData.bagType];
         
         this.addBotMessage(
-            `Current selection: ${product?.name || 'No product selected'}
+            `🔄 Modifying Order ${this.currentOrderId}
             
+Current selection: ${product?.name || 'No product selected'}
+
 What would you like to modify?`,
             [
-                { text: "Change Product Type", value: "get_quote" },
-                { text: "Change Quantity", value: "modify_quantity" },
-                { text: "Start Over", value: "new_quote" }
+                { text: "Change Product Type", value: "get_quote", icon: "fas fa-exchange-alt" },
+                { text: "Change Quantity", value: "modify_quantity", icon: "fas fa-calculator" },
+                { text: "Start New Order", value: "new_quote", icon: "fas fa-plus" }
             ],
             800
+        );
+    }
+
+    showOrderTracking() {
+        if (this.orderHistory.length === 0) {
+            this.addBotMessage(
+                "No orders found. Would you like to place a new order?",
+                [
+                    { text: "Get Quote", value: "get_quote", icon: "fas fa-plus" },
+                    { text: "Product Info", value: "product_info", icon: "fas fa-info-circle" }
+                ],
+                800
+            );
+            return;
+        }
+
+        // Group orders by ID to show latest status
+        const orderMap = new Map();
+        this.orderHistory.forEach(order => {
+            orderMap.set(order.id, order);
+        });
+
+        let trackingInfo = "📋 Your Order History:\n\n";
+        
+        orderMap.forEach((order, orderId) => {
+            const date = new Date(order.timestamp).toLocaleDateString();
+            const time = new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            trackingInfo += `🔸 Order ID: ${orderId}\n`;
+            trackingInfo += `📦 Product: ${order.product}\n`;
+            trackingInfo += `📊 Quantity: ${order.quantity}\n`;
+            trackingInfo += `💰 Price: ${order.price}\n`;
+            trackingInfo += `📅 Date: ${date} at ${time}\n`;
+            trackingInfo += `📌 Status: ${order.status}\n\n`;
+        });
+
+        this.addBotMessage(
+            trackingInfo,
+            [
+                { text: "Modify Current Order", value: "modify_current_order", icon: "fas fa-edit" },
+                { text: "New Quote", value: "new_quote", icon: "fas fa-plus" },
+                { text: "Contact Support", value: "contact_sales", icon: "fas fa-headset" }
+            ],
+            1000
         );
     }
 

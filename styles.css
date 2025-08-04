@@ -2861,19 +2861,53 @@ html {
     animation: pulse 2s infinite;
 }
 
+/* Chatbot Controls */
+.chatbot-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.chatbot-minimize,
 .chatbot-close {
     background: none;
     border: none;
     color: var(--white);
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
     padding: 8px;
     border-radius: 50%;
     transition: var(--transition);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+.chatbot-minimize:hover,
 .chatbot-close:hover {
     background: rgba(255,255,255,0.2);
+    transform: scale(1.1);
+}
+
+/* Movable Circle Icon */
+.chatbot-circle-icon {
+    animation: floatCircle 3s ease-in-out infinite;
+}
+
+.chatbot-circle-icon:hover {
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+}
+
+@keyframes floatCircle {
+    0%, 100% { 
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    }
+    50% { 
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+    }
 }
 
 /* Messages Area */
@@ -3156,6 +3190,13 @@ html {
         display: none;
     }
     
+    .chatbot-circle-icon {
+        width: 55px;
+        height: 55px;
+        left: 15px;
+        font-size: 22px;
+    }
+    
     .message-content {
         max-width: 85%;
     }
@@ -3177,6 +3218,13 @@ html {
         right: 0;
         border-radius: 0;
         position: fixed;
+    }
+    
+    .chatbot-circle-icon {
+        width: 50px;
+        height: 50px;
+        left: 10px;
+        font-size: 20px;
     }
 }
 
